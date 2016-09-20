@@ -1,0 +1,7 @@
+---
+extends:
+  - standard
+  - plugin:import/errors
+installedESLint: true
+plugins:
+  - standard

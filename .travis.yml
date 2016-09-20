@@ -1,0 +1,27 @@
+---
+git:
+  depth: 1
+sudo: false
+language: node_js
+cache:
+  directories:
+  - $HOME/.npm
+  - node_modules
+env:
+  global:
+    - COVERAGE=false
+    - TASK=node
+matrix:
+  fast_finish: true
+  include:
+    #
+    - node_js: node
+    - node_js: '6'
+    - node_js: '5'
+    - node_js: '4'
+before_install:
+  - "npm install -g npm"
+after_script:
+  - "[ $COVERAGE == false ] || npm install codecov.io"
+  - "[ $COVERAGE == false ] || npm run coverage"
+  - "[ $COVERAGE == false ] || cat ./coverage/lcov.info | ./node_modules/codecov.io/bin/codecov.io.js"

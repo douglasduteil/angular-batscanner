@@ -1,0 +1,1 @@
+{"version":3,"file":null,"sources":["../src/umd-angular-polyfill.js"],"sourcesContent":["window._angular_core = window.ng.core\nwindow._angular_compiler = window.ng.compiler\n"],"names":["window","_angular_core","ng","core","_angular_compiler","compiler"],"mappings":";;;;;;AAAAA,OAAOC,aAAP,GAAuBD,OAAOE,EAAP,CAAUC,IAAjC;AACAH,OAAOI,iBAAP,GAA2BJ,OAAOE,EAAP,CAAUG,QAArC;;"}

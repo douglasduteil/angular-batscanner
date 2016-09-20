@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>_ Timer _ Angular 2 Batscanner _</title>
+</head>
+<body>
+  <!--
+
+  -->
+  <h1>Simple timer</h1>
+  <demo-timer></demo-timer>
+  <!--
+
+  -->
+  <script src="../node_modules/zone.js/dist/zone.js"></script>
+  <script src="../node_modules/reflect-metadata/Reflect.js"></script>
+  <script src="../node_modules/rxjs/bundles/Rx.js"></script>
+  <script src="../node_modules/@angular/core/bundles/core.umd.js"></script>
+  <script src="../node_modules/@angular/common/bundles/common.umd.js"></script>
+  <script src="../node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
+  <script src="../node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
+  <script src="../node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
+  <!--
+
+  -->
+  <script src="../node_modules/angular-batscanner-core/bundles/umd-angular-polyfill.js"></script>
+  <script src="../node_modules/angular-batscanner-core/bundles/angular-batscanner-core.umd.js"></script>
+  <!--
+
+  -->
+  <script>
+  (function () {
+    const { ng, angularBatscannerCore } = window
+    const { BATSCANNER_PROVIDERS, BATSCANNER_ROOT_COMPONENT } = angularBatscannerCore
+
+    console.log(BATSCANNER_PROVIDERS)
+
+    const TimerComponent = ng.core
+      .Component({
+        inputs: ['time: value'],
+        selector: 'timer',
+        template: '<h1>Time : {{ time }}sec</h1>'
+      })
+      .Class({constructor: function () {}})
+
+    const AppComponent = ng.core
+      .Component({
+        selector: 'demo-timer',
+        template: '<timer [value]="timerValue"></timer>'
+      })
+      .Class({
+        constructor: function () {
+          this.timerValue = 0
+        },
+        ngOnInit () {
+          this.timerInterval = setInterval(() => {
+            this.timerValue += 1
+          }, 1000)
+        },
+        ngOnDestroy () {
+          clearInterval(this.timerInterval)
+        }
+      })
+
+    const AppModule = ng.core
+      .NgModule({
+        imports: [ ng.platformBrowser.BrowserModule ],
+        declarations: [ AppComponent, TimerComponent ],
+        bootstrap: [ AppComponent ]
+      })
+      .Class({constructor: function () {}})
+
+    const compilerOptions = {
+      providers: [
+        BATSCANNER_PROVIDERS,
+        {provide: BATSCANNER_ROOT_COMPONENT, useValue: AppComponent}
+      ]
+    }
+
+    //
+
+    document.addEventListener('DOMContentLoaded', function () {
+      ng.platformBrowserDynamic
+        .platformBrowserDynamic()
+        .bootstrapModule(AppModule, compilerOptions)
+    })
+  }())
+    /* eslint-disable no-trailing-spaces, eol-last */
+  </script>
+
+  <script>
+    window.TTT = true
+
+    window.postMessage({
+      source: 'foobar',
+      payload: { action: 'register' }
+    }, '*')
+
+    setInterval(function pinging () {
+      window.postMessage({
+        source: 'foobar',
+        payload: { foo: 'bar' }
+      }, '*')
+    }, 1000)
+
+    console.log(ng)
+    /* eslint-disable no-trailing-spaces, eol-last */
+  </script>
+  <!--
+
+  -->
+</body>
+</html>
