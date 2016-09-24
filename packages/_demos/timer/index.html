@@ -24,7 +24,6 @@
   <!--
 
   -->
-  <script src="../node_modules/angular-batscanner-core/bundles/umd-angular-polyfill.js"></script>
   <script src="../node_modules/angular-batscanner-core/bundles/angular-batscanner-core.umd.js"></script>
   <!--
 
@@ -32,9 +31,12 @@
   <script>
   (function () {
     const { ng, angularBatscannerCore } = window
-    const { BATSCANNER_PROVIDERS, BATSCANNER_ROOT_COMPONENT } = angularBatscannerCore
-
-    console.log(BATSCANNER_PROVIDERS)
+    const {
+      //BatscannerNgZonejsHook,
+      BATSCANNER_PROVIDERS,
+      BATSCANNER_ROOT_COMPONENT,
+      InAppNgZoneHook
+    } = angularBatscannerCore
 
     const TimerComponent = ng.core
       .Component({
@@ -42,15 +44,17 @@
         selector: 'timer',
         template: '<h1>Time : {{ time }}sec</h1>'
       })
-      .Class({constructor: function () {}})
+      .Class({
+        constructor: function TimerComponent () {}
+      })
 
     const AppComponent = ng.core
       .Component({
         selector: 'demo-timer',
-        template: '<timer [value]="timerValue"></timer>'
+        template: ' <timer [value]="timerValue"></timer>'
       })
       .Class({
-        constructor: function () {
+        constructor: function AppComponent () {
           this.timerValue = 0
         },
         ngOnInit () {
@@ -67,11 +71,16 @@
       .NgModule({
         imports: [ ng.platformBrowser.BrowserModule ],
         declarations: [ AppComponent, TimerComponent ],
-        bootstrap: [ AppComponent ]
+        bootstrap: [ AppComponent ],
+        providers: [
+        ]
       })
-      .Class({constructor: function () {}})
+      .Class({constructor: function AppModule () {}})
 
     const compilerOptions = {
+      declarations: [
+        // BatscannerNgZonejsHook
+      ],
       providers: [
         BATSCANNER_PROVIDERS,
         {provide: BATSCANNER_ROOT_COMPONENT, useValue: AppComponent}
@@ -86,25 +95,6 @@
         .bootstrapModule(AppModule, compilerOptions)
     })
   }())
-    /* eslint-disable no-trailing-spaces, eol-last */
-  </script>
-
-  <script>
-    window.TTT = true
-
-    window.postMessage({
-      source: 'foobar',
-      payload: { action: 'register' }
-    }, '*')
-
-    setInterval(function pinging () {
-      window.postMessage({
-        source: 'foobar',
-        payload: { foo: 'bar' }
-      }, '*')
-    }, 1000)
-
-    console.log(ng)
     /* eslint-disable no-trailing-spaces, eol-last */
   </script>
   <!--

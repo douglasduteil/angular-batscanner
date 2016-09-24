@@ -9,10 +9,10 @@ import {
 
 export function needToBeScaned (directiveType) {
   let requireRuntimeMetadataResolverHooks = true
-  requireRuntimeMetadataResolverHooks = requireRuntimeMetadataResolverHooks && !directiveType[IS_PART_OF_THE_DEBUGGER]
-  requireRuntimeMetadataResolverHooks = requireRuntimeMetadataResolverHooks && !directiveType[HAS_RUNTIME_METADATA_RESOLVER_HOOK]
+  requireRuntimeMetadataResolverHooks &= !directiveType[IS_PART_OF_THE_DEBUGGER]
+  requireRuntimeMetadataResolverHooks &= !directiveType[HAS_RUNTIME_METADATA_RESOLVER_HOOK]
 
-  return requireRuntimeMetadataResolverHooks
+  return Boolean(requireRuntimeMetadataResolverHooks)
 }
 
 export function markAsScaned (directiveType) {

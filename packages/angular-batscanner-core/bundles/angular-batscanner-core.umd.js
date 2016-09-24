@@ -1,8 +1,21 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/compiler'), require('@angular/core')) :
-  typeof define === 'function' && define.amd ? define(['exports', '@angular/compiler', '@angular/core'], factory) :
-  (factory((global.angularBatscannerCore = global.angularBatscannerCore || {}),global._angular_compiler,global._angular_core));
-}(this, (function (exports,_angular_compiler,_angular_core) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/compiler'), require('@angular/core'), require('rxjs/Observable'), require('rxjs/Subject')) :
+  typeof define === 'function' && define.amd ? define(['exports', '@angular/compiler', '@angular/core', 'rxjs/Observable', 'rxjs/Subject'], factory) :
+  (factory((global.angularBatscannerCore = global.angularBatscannerCore || {}),global.ng.compiler,global.ng.core,global.Rx,global.Rx));
+}(this, (function (exports,_angular_compiler,_angular_core,rxjs_Observable,rxjs_Subject) { 'use strict';
+
+//
+
+//
+
+var HAS_RUNTIME_METADATA_RESOLVER_HOOK = '__HAS_RUNTIME_METADATA_RESOLVER_HOOK__'; // Make this a symbol
+var IS_PART_OF_THE_DEBUGGER = '__IS_PART_OF_THE_DEBUGGER__';
+var BATSCANNER_ID = '__BATSCANNER_ID__';
+
+
+//
+
+var BATSCANNER_ROOT_COMPONENT = new _angular_core.OpaqueToken('BATSCANNER_ROOT_COMPONENT');
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -119,14 +132,17 @@ var set = function set(object, property, value, receiver) {
 
 //
 
-var BatscannerEventAggregator = function BatscannerEventAggregator() {
-  classCallCheck(this, BatscannerEventAggregator);
-};
+var BatscannerEventEmitter = function () {
+  function BatscannerEventEmitter() {
+    classCallCheck(this, BatscannerEventEmitter);
+  }
 
-//
-
-var HAS_RUNTIME_METADATA_RESOLVER_HOOK = '__HAS_RUNTIME_METADATA_RESOLVER_HOOK__'; // Make this a symbol
-var IS_PART_OF_THE_DEBUGGER = '__IS_PART_OF_THE_DEBUGGER__';
+  createClass(BatscannerEventEmitter, [{
+    key: "next",
+    value: function next() {}
+  }]);
+  return BatscannerEventEmitter;
+}();
 
 //
 
@@ -134,10 +150,10 @@ var IS_PART_OF_THE_DEBUGGER = '__IS_PART_OF_THE_DEBUGGER__';
 
 function needToBeScaned(directiveType) {
   var requireRuntimeMetadataResolverHooks = true;
-  requireRuntimeMetadataResolverHooks = requireRuntimeMetadataResolverHooks && !directiveType[IS_PART_OF_THE_DEBUGGER];
-  requireRuntimeMetadataResolverHooks = requireRuntimeMetadataResolverHooks && !directiveType[HAS_RUNTIME_METADATA_RESOLVER_HOOK];
+  requireRuntimeMetadataResolverHooks &= !directiveType[IS_PART_OF_THE_DEBUGGER];
+  requireRuntimeMetadataResolverHooks &= !directiveType[HAS_RUNTIME_METADATA_RESOLVER_HOOK];
 
-  return requireRuntimeMetadataResolverHooks;
+  return Boolean(requireRuntimeMetadataResolverHooks);
 }
 
 function markAsScaned(directiveType) {
@@ -148,7 +164,11 @@ function markAsScaned(directiveType) {
 
 //
 
+var LifecycleHooks = _angular_core.__core_private__.LifecycleHooks;
+var LIFECYCLE_HOOKS_VALUES = _angular_core.__core_private__.LIFECYCLE_HOOKS_VALUES;
 var CompileMetadataResolver$1 = _angular_compiler.__compiler_private__.CompileMetadataResolver;
+
+var GLOBAL_ID = 0;
 
 //
 
@@ -164,25 +184,63 @@ var BatScannerCompileMetadataResolver = function (_CompileMetadataResol) {
 
     var _this = possibleConstructorReturn(this, (BatScannerCompileMetadataResolver.__proto__ || Object.getPrototypeOf(BatScannerCompileMetadataResolver)).call(this, _ngModuleResolver, _directiveResolver, _pipeResolver, _viewResolver, _config, _console, _reflector));
 
-    _this._eventAggregator = _injector.get(BatscannerEventAggregator);
+    _this._eventEmitter = _injector.get(BatscannerEventEmitter);
     return _this;
   }
 
   createClass(BatScannerCompileMetadataResolver, [{
-    key: 'getDirectiveMetadata',
-    value: function getDirectiveMetadata(directiveType, throwIfNotFound) {
+    key: 'getTypeMetadata',
+    value: function getTypeMetadata(directiveType, moduleUrl, dependencies) {
       directiveType = _angular_core.resolveForwardRef(directiveType);
-      var meta = this._directiveCache.get(directiveType);
 
-      if (!meta || !needToBeScaned(directiveType)) {
-        return get(BatScannerCompileMetadataResolver.prototype.__proto__ || Object.getPrototypeOf(BatScannerCompileMetadataResolver.prototype), 'getDirectiveMetadata', this).call(this, directiveType, throwIfNotFound);
+      if (!needToBeScaned(directiveType)) {
+        return get(BatScannerCompileMetadataResolver.prototype.__proto__ || Object.getPrototypeOf(BatScannerCompileMetadataResolver.prototype), 'getTypeMetadata', this).call(this, directiveType, moduleUrl, dependencies);
       }
 
-      // directiveType.prototype = wrapAllLifeCyleHooksOf(directiveType)
+      //
 
       markAsScaned(directiveType);
 
-      return get(BatScannerCompileMetadataResolver.prototype.__proto__ || Object.getPrototypeOf(BatScannerCompileMetadataResolver.prototype), 'getDirectiveMetadata', this).call(this, directiveType, throwIfNotFound);
+      //
+
+      var emitter = this._eventEmitter;
+      directiveType.prototype = LIFECYCLE_HOOKS_VALUES.reduce(function (proto, lifecycleHook) {
+        var lifecycleHookName = LifecycleHooks[lifecycleHook];
+        var existingHook = proto['ng' + lifecycleHookName];
+
+        if (lifecycleHook === LifecycleHooks.OnInit) {
+          (function () {
+            var originalHook = proto.ngOnInit;
+            proto.ngOnInit = function ngOnInitBatScanner() {
+              this[BATSCANNER_ID] = GLOBAL_ID++;
+              if (originalHook) {
+                originalHook.call(this);
+              }
+            };
+
+            existingHook = proto.ngOnInit;
+          })();
+        }
+
+        proto['ng' + lifecycleHookName] = function (changes) {
+          if (existingHook) {
+            existingHook.call(this, changes);
+          }
+
+          emitter.next({
+            id: this[BATSCANNER_ID],
+            timestamp: window.performance.now(),
+            type: lifecycleHookName,
+            targetName: directiveType.name,
+            target: directiveType,
+            changes: changes
+          });
+        };
+
+        return proto;
+      }, directiveType.prototype);
+
+      return get(BatScannerCompileMetadataResolver.prototype.__proto__ || Object.getPrototypeOf(BatScannerCompileMetadataResolver.prototype), 'getTypeMetadata', this).call(this, directiveType, moduleUrl, dependencies);
     }
   }]);
   return BatScannerCompileMetadataResolver;
@@ -199,13 +257,129 @@ BatScannerCompileMetadataResolver.ctorParameters.unshift({ type: _angular_core.I
 
 //
 
-var CompileMetadataResolver = _angular_compiler.__compiler_private__.CompileMetadataResolver;
+var LifecycleHooks$1 = _angular_core.__core_private__.LifecycleHooks;
 
 //
 
-var BATSCANNER_ROOT_COMPONENT = 'BATSCANNER_ROOT_COMPONENT';
+function BatscannerEventAggregator() {
+  this.aggregateUntill = aggregateUntill;
+}
 
-var BATSCANNER_PROVIDERS = [{ provide: CompileMetadataResolver, useClass: BatScannerCompileMetadataResolver }, BatscannerEventAggregator];
+//
+
+function aggregateUntill(source, componentToken) {
+  // HACK(@douglasduteil): source filter triggered before the buffer problem
+  //
+  // Basic implementation would suggest to directly listen to the source
+  // without wrapping it in another Observable. But it's causing problem of
+  // notification ordnance. Indeed, if we subscribe to the source here, the
+  // first puller will be the closingNotifier$ and not the buffer$ that will
+  // start pulling after the client subscribe to the source. Thus the
+  // closingNotifier$ end the buffer$ before it has the chance to get the last
+  // event...
+  //
+  // We get :
+  //
+  // ```
+  //           source : ---A---B---C---X------------>
+  // closingNotifier$ : ---------------X------------>
+  //          buffer$ : ---------------[A, B, C]---->
+  // ```
+  //
+  // Instead of:
+  //
+  // ```
+  //           source : ---A---B---C---X------------>
+  //          buffer$ : ---------------[A, B, C, X]->
+  // closingNotifier$ : ---------------X------------>
+  // ```
+
+  var hasCheckedTheRootComponent = rootComponentAfterViewChecked.bind(null, componentToken);
+
+  return rxjs_Observable.Observable.create(aggregationObservable);
+
+  //
+
+  function aggregationObservable(observer) {
+    // Manually on next the buffer at the end of each RootComponent check
+    var everyRootComponentAfterViewChecked = new rxjs_Subject.Subject();
+
+    // Must be the first to subscribe to source to buffer any incoming events
+    var buffer$ = source.buffer(everyRootComponentAfterViewChecked).subscribe(function (e) {
+      return observer.next(e);
+    });
+
+    // Listen to the source for AfterViewChecked AFTER buffering stuff
+    var closingNotifier$ = source.filter(function (e) {
+      return hasCheckedTheRootComponent(e);
+    }).subscribe(function () {
+      return everyRootComponentAfterViewChecked.next();
+    });
+
+    return function () {
+      buffer$.dispose();
+      closingNotifier$.dispose();
+    };
+  }
+}
+
+function rootComponentAfterViewChecked(root, event) {
+  var type = event.type;
+  var target = event.target;
+
+  var isTheRootComponent = target === root;
+  var isDoCheckEventType = LifecycleHooks$1[type] === LifecycleHooks$1.AfterViewChecked;
+  return isTheRootComponent && isDoCheckEventType;
+}
+
+//
+
+//
+
+BatscannerWindowPostMessageEmitter.ctorParameters = [{ type: _angular_core.Injector }];
+function BatscannerWindowPostMessageEmitter(injector) {
+  var rootComponent = injector.get(BATSCANNER_ROOT_COMPONENT);
+  var eventAggregator = injector.get(BatscannerEventAggregator);
+
+  //
+
+  window.TTT = true;
+
+  var suject = new rxjs_Subject.Subject();
+  this.next = suject.next.bind(suject);
+
+  //
+
+  var source = eventAggregator.aggregateUntill(suject, rootComponent);
+
+  //
+
+  source.subscribe(function postMessage(aggregatedEvents) {
+    console.log('#postMessage', aggregatedEvents);
+
+    window.postMessage({
+      source: 'foobar',
+      payload: JSON.parse(JSON.stringify(aggregatedEvents))
+    }, '*');
+  });
+}
+
+//
+
+//
+
+//
+
+var CompileMetadataResolver = _angular_compiler.__compiler_private__.CompileMetadataResolver;
+
+var BATSCANNER_PROVIDERS = [
+// TODO(@douglasduteil): clarrify if must be required by default or not
+// Will throw
+// "DI Error caused by: No provider for Token BATSCANNER_ROOT_COMPONENT"
+// if not defined by the user
+// {provide: BATSCANNER_ROOT_COMPONENT, useValue: ''},
+
+{ provide: CompileMetadataResolver, useClass: BatScannerCompileMetadataResolver }, { provide: BatscannerEventEmitter, useClass: BatscannerWindowPostMessageEmitter }, BatscannerEventAggregator];
 
 //
 

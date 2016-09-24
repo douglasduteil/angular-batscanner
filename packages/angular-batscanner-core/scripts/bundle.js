@@ -12,7 +12,6 @@ const targetFormats = ['umd']
 Promise.resolve()
   .then(() => del([`${destDirectory}/*`]))
   .then(() => Promise.all([
-    compileUmdPolyfill(),
     compileInAllFormats(targetFormats)
   ]))
 
@@ -26,14 +25,6 @@ function compileInAllFormats (formats) {
       format
     }))
   }, Promise.resolve())
-}
-
-function compileUmdPolyfill () {
-  return compile({
-    target: 'src/umd-angular-polyfill.js',
-    dest: 'umd-angular-polyfill.js',
-    format: 'umd'
-  })
 }
 
 //
@@ -50,6 +41,12 @@ function compile (options) {
       ]
     })
     .then(bundle => bundle.write({
+      globals: {
+        'rxjs/Observable': 'Rx',
+        'rxjs/Subject': 'Rx',
+        '@angular/core': 'ng.core',
+        '@angular/compiler': 'ng.compiler'
+      },
       dest: `${destDirectory}/${options.dest}`,
       format: options.format,
       sourceMap: true,
