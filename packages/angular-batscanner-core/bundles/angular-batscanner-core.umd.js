@@ -343,7 +343,7 @@ function BatscannerWindowPostMessageEmitter(injector) {
 
   //
 
-  window.TTT = true;
+  window.__ANGULAR_BATSCANNER__ = true;
 
   var suject = new rxjs_Subject.Subject();
   this.next = suject.next.bind(suject);

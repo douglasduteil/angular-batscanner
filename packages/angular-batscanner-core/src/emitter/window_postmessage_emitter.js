@@ -16,7 +16,7 @@ export function BatscannerWindowPostMessageEmitter (injector) {
 
   //
 
-  window.TTT = true
+  window.__ANGULAR_BATSCANNER__ = true
 
   const suject = new Subject()
   this.next = suject.next.bind(suject)

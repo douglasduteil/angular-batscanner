@@ -32,10 +32,8 @@
   (function () {
     const { ng, angularBatscannerCore } = window
     const {
-      //BatscannerNgZonejsHook,
       BATSCANNER_PROVIDERS,
-      BATSCANNER_ROOT_COMPONENT,
-      InAppNgZoneHook
+      BATSCANNER_ROOT_COMPONENT
     } = angularBatscannerCore
 
     const TimerComponent = ng.core
@@ -78,9 +76,6 @@
       .Class({constructor: function AppModule () {}})
 
     const compilerOptions = {
-      declarations: [
-        // BatscannerNgZonejsHook
-      ],
       providers: [
         BATSCANNER_PROVIDERS,
         {provide: BATSCANNER_ROOT_COMPONENT, useValue: AppComponent}
