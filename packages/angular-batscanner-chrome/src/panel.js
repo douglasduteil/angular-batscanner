@@ -10,7 +10,6 @@ import { DevToolModule } from 'angular-batscanner-devtool'
 
 const backendConnection$ = new Subject()
 const backendMessage$ = backendConnection$
-  .startWith(1)
   .switchMap(() => backendPortStream())
 
 export function connectToTab () {
@@ -86,7 +85,9 @@ function backendPortStream () {
     })
 
     return function () {
+      console.log('disconnected from backend')
       port.onMessage.removeListener(broadcastNext)
+      port.disconnect()
     }
   })
 }
