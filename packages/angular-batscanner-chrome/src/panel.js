@@ -33,7 +33,6 @@ const BatscannerPanelComponent = Component({
   }],
 
   ngOnInit () {
-    //const backendPort$ = backendPortStream()
     this.subscription = backendMessage$.subscribe(() => {
       console.log('backend -> panel')
       this._ngZone.run(() => {

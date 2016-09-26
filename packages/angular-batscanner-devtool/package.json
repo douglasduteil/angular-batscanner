@@ -1,8 +1,8 @@
 {
   "name": "angular-batscanner-devtool",
   "version": "0.0.0",
-  "description": "",
-  "main": "bundles/angular-batscanner-devtool.umd.js",
+  "description": "Angular 2 BatScanner devtool",
+  "main": "lib/angular-batscanner-devtool.umd.js",
   "scripts": {
     "build": "node scripts/build.js",
     "start": "npm run watch:build",

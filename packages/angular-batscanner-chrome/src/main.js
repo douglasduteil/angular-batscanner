@@ -65,7 +65,7 @@ function connectToExistingPanel (panel) {
 }
 
 function createPanel () {
-  chrome.devtools.panels.create('Angular BatScanner', '', 'build/panel.html', function (panel) {
+  chrome.devtools.panels.create('Angular BatScanner', '', 'lib/panel.html', function (panel) {
     panel.onShown.addListener(function (window) {
       panelInstance = window.angularBatscannerChrome
     })

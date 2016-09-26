@@ -11,7 +11,7 @@ const pkg = require('../package.json')
 
 //
 
-const destDirectory = 'build'
+const destDirectory = 'lib'
 const scriptToBuild = [
   'background',
   'contentScript',

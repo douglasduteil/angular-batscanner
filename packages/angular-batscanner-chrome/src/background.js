@@ -85,7 +85,7 @@ function isNumeric (str) {
 
 function installContentScript (tabId) {
   chrome.tabs.executeScript(tabId, {
-    file: '/build/contentScript.js'
+    file: '/lib/contentScript.js'
   }, function () {})
 }
 

@@ -6,7 +6,7 @@ const rollup = require('rollup')
 const babel = require('rollup-plugin-babel')
 const pkg = require('../package.json')
 
-const destDirectory = 'bundles'
+const destDirectory = 'lib'
 const targetFormats = ['umd']
 
 Promise.resolve()
