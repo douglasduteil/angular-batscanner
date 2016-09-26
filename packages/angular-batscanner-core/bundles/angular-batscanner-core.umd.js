@@ -355,10 +355,8 @@ function BatscannerWindowPostMessageEmitter(injector) {
   //
 
   source.subscribe(function postMessage(aggregatedEvents) {
-    console.log('#postMessage', aggregatedEvents);
-
     window.postMessage({
-      source: 'foobar',
+      source: 'angular-batscanner',
       payload: JSON.parse(JSON.stringify(aggregatedEvents))
     }, '*');
   });
@@ -379,7 +377,11 @@ var BATSCANNER_PROVIDERS = [
 // if not defined by the user
 // {provide: BATSCANNER_ROOT_COMPONENT, useValue: ''},
 
-{ provide: CompileMetadataResolver, useClass: BatScannerCompileMetadataResolver }, { provide: BatscannerEventEmitter, useClass: BatscannerWindowPostMessageEmitter }, BatscannerEventAggregator];
+{ provide: CompileMetadataResolver, useClass: BatScannerCompileMetadataResolver }, { provide: BatscannerEventEmitter, useClass: BatscannerWindowPostMessageEmitter },
+
+//
+
+BatscannerEventAggregator];
 
 //
 
@@ -389,6 +391,9 @@ var BATSCANNER_PROVIDERS = [
 
 exports.BATSCANNER_ROOT_COMPONENT = BATSCANNER_ROOT_COMPONENT;
 exports.BATSCANNER_PROVIDERS = BATSCANNER_PROVIDERS;
+exports.BatscannerEventEmitter = BatscannerEventEmitter;
+exports.BatscannerEventAggregator = BatscannerEventAggregator;
+exports.BatscannerWindowPostMessageEmitter = BatscannerWindowPostMessageEmitter;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

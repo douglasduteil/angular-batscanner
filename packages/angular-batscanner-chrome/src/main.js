@@ -2,42 +2,76 @@
 
 /* global chrome */
 
-var panelCreated = false
+var panelInstance = null
 
-chrome.devtools.network.onNavigated.addListener(function () {
-  createPanelIfTTTLoaded()
-})
-
-// Check to see if React has loaded once per second in case React is added
+// Check to see if AngularBatscanner has loaded once per second in case React is added
 // after page load
 var loadCheckInterval = setInterval(function () {
-  createPanelIfTTTLoaded()
+  createPanelIfAngularBatscannerLoaded()
 }, 1000)
 
-createPanelIfTTTLoaded()
+createPanelIfAngularBatscannerLoaded()
 
 //
 
-function createPanelIfTTTLoaded () {
-  if (panelCreated) {
+chrome.devtools.network.onNavigated.addListener(function () {
+  console.log('devtools detected reload !')
+  loadCheckInterval = setInterval(function () {
+    connectToExistingPanelIfAngularBatscannerLoaded()
+  }, 1000)
+})
+
+//
+
+function connectToExistingPanelIfAngularBatscannerLoaded () {
+  if (!panelInstance) {
     return
   }
 
-  asyncIsTTTLoaded(function (pageHasTTT, err) {
-    if (!pageHasTTT || panelCreated) {
+  asyncIsBatscannerLoaded(function (pageHasNgBatScan, err) {
+    if (!pageHasNgBatScan || !panelInstance) {
+      return
+    }
+
+    connectToExistingPanel(panelInstance)
+    clearInterval(loadCheckInterval)
+  })
+}
+
+function createPanelIfAngularBatscannerLoaded () {
+  if (panelInstance) {
+    return
+  }
+
+  asyncIsBatscannerLoaded(function (pageHasNgBatScan, err) {
+    if (!pageHasNgBatScan || panelInstance) {
       return
     }
 
     createPanel()
     clearInterval(loadCheckInterval)
-    panelCreated = true
   })
 }
 
-function createPanel () {
-  chrome.devtools.panels.create('TTT', '', 'panel.html', function (panel) {})
+//
+
+function connectToExistingPanel (panel) {
+  if (!panel) {
+    console.error('No panel :(')
+    return
+  }
+
+  panel.connectToTab()
 }
 
-function asyncIsTTTLoaded (callback) {
-  return chrome.devtools.inspectedWindow.eval('!!(\n    window.TTT\n  )', callback)
+function createPanel () {
+  chrome.devtools.panels.create('Angular BatScanner', '', 'build/panel.html', function (panel) {
+    panel.onShown.addListener(function (window) {
+      panelInstance = window.angularBatscannerChrome
+    })
+  })
+}
+
+function asyncIsBatscannerLoaded (callback) {
+  return chrome.devtools.inspectedWindow.eval('!!(\n    window.__ANGULAR_BATSCANNER__\n  )', callback)
 }

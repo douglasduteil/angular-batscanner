@@ -10,6 +10,11 @@
     "128": "icons/icon-128x128.png"
   },
 
+  "devtools_page": "build/main.html",
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "web_accessible_resources": [ "build/main.html", "build/panel.html"],
+
   "background": {
     "scripts": [ "build/background.js" ],
     "persistent": false

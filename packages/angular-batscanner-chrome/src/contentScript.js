@@ -27,14 +27,14 @@ function handleMessageFromDevtools (message) {
 function handleMessageFromPage (evt) {
   console.log('page -> content-script')
 
-  if (evt.data && evt.data.source === 'foobar') {
-    // console.log('page -> rep -> dev', evt.data);
+  if (evt.data && evt.data.source === 'angular-batscanner') {
+    console.log('page -> content-script -> backend', evt.data)
     port.postMessage(evt.data.payload)
   }
 }
 
 function handleDisconnect () {
-  console.log('backend -> xxx')
+  console.log('backend  -> content-script -> xxx')
   window.removeEventListener('message', handleMessageFromPage)
   window.postMessage({
     payload: {

@@ -1,31 +1,83 @@
 /* global chrome */
 
-var ports = {}
+const ports = {}
 
-chrome.runtime.onConnect.addListener(function (port) {
-  var tab = null
-  var name = null
-  if (isNumeric(port.name)) {
-    tab = port.name
-    name = 'devtools'
-    installContentScript(+port.name)
-  } else {
-    tab = port.sender.tab.id
-    name = 'content-script'
-  }
+//
+
+chrome.runtime.onConnect.addListener(onConnectToExtensionBackend)
+
+//
+
+function onConnectToExtensionBackend (port) {
+  const {tab, name} = resolvePortType(port)
 
   if (!ports[tab]) {
     ports[tab] = {
       devtools: null,
-      'content-script': null
+      contentScript: null
     }
   }
+
   ports[tab][name] = port
 
-  if (ports[tab].devtools && ports[tab]['content-script']) {
-    doublePipe(ports[tab].devtools, ports[tab]['content-script'])
+  if (ports[tab].devtools && ports[tab].contentScript) {
+    console.log('devtools <- backend ' + tab + ' -> content-script')
+    doublePipe(ports[tab])
   }
-})
+}
+
+//
+
+function resolvePortType (port) {
+  return false ||
+    isNumeric(port.name) && resolveAsDevtool(port) ||
+    resolveAsContentScript(port)
+}
+
+function doublePipe (metaPort) {
+  const {devtools, contentScript} = metaPort
+
+  devtools.onMessage.addListener(lDevtools)
+  function lDevtools (message) {
+    console.log('devtools -> backend -> contentScript', message)
+    contentScript.postMessage(message)
+  }
+  contentScript.onMessage.addListener(lContentScript)
+  function lContentScript (message) {
+    console.log('contentScript -> backend -> devtools', message)
+    devtools.postMessage(message)
+  }
+  function shutdown () {
+    console.log('contentScript x- backend -x devtools')
+    devtools.onMessage.removeListener(lDevtools)
+    contentScript.onMessage.removeListener(lContentScript)
+    devtools.disconnect()
+    contentScript.disconnect()
+
+    metaPort.devtools = metaPort.contentScript = null
+  }
+  devtools.onDisconnect.addListener(shutdown)
+  contentScript.onDisconnect.addListener(shutdown)
+}
+
+//
+
+function resolveAsDevtool (port) {
+  const tab = Number(port.name)
+  const name = 'devtools'
+
+  console.log(`new ${name} for tab n°${tab}`)
+  installContentScript(tab)
+  return { tab, name }
+}
+
+function resolveAsContentScript (port) {
+  const tab = Number(port.sender.tab.id)
+  const name = 'contentScript'
+
+  console.log(`new ${name} for tab n°${tab}`)
+  return { tab, name }
+}
 
 function isNumeric (str) {
   return +str + '' === str
@@ -37,23 +89,3 @@ function installContentScript (tabId) {
   }, function () {})
 }
 
-function doublePipe (one, two) {
-  one.onMessage.addListener(lOne)
-  function lOne (message) {
-    // console.log('dv -> rep', message);
-    two.postMessage(message)
-  }
-  two.onMessage.addListener(lTwo)
-  function lTwo (message) {
-    // console.log('rep -> dv', message);
-    one.postMessage(message)
-  }
-  function shutdown () {
-    one.onMessage.removeListener(lOne)
-    two.onMessage.removeListener(lTwo)
-    one.disconnect()
-    two.disconnect()
-  }
-  one.onDisconnect.addListener(shutdown)
-  two.onDisconnect.addListener(shutdown)
-}

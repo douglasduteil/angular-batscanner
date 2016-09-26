@@ -28,10 +28,8 @@ export function BatscannerWindowPostMessageEmitter (injector) {
   //
 
   source.subscribe(function postMessage (aggregatedEvents) {
-    console.log('#postMessage', aggregatedEvents)
-
     window.postMessage({
-      source: 'foobar',
+      source: 'angular-batscanner',
       payload: JSON.parse(JSON.stringify(aggregatedEvents))
     }, '*')
   })

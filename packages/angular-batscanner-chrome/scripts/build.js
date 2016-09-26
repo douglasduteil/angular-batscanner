@@ -1,20 +1,25 @@
 'use strict'
 
+const fs = require('fs')
+
 const del = require('del')
-const camelCase = require('copyfiles')
-const copyfiles = require('camel-case')
+const camelCase = require('camel-case')
 const rollup = require('rollup')
 const babel = require('rollup-plugin-babel')
+
 const pkg = require('../package.json')
+
+//
 
 const destDirectory = 'build'
 const scriptToBuild = [
   'background',
   'contentScript',
-  'main'
+  'main',
+  'panel'
 ]
 
-const htmlFilesToCopy = [
+const htmlFilesToCopy = [
   'main.html',
   'panel.html'
 ]
@@ -23,8 +28,12 @@ Promise.resolve()
   .then(() => del([`${destDirectory}/*`]))
   .then(() => Promise.all(
     [].concat(scriptToBuild.map(compileToUmd))
-      .concat(copyHtmlFiles(htmlFilesToCopy))
+      .concat(htmlFilesToCopy.map(copyHtmlFiles))
   ))
+  .then(
+    () => console.log('~~ Done ~~ '),
+    (e) => console.error(e)
+  )
 
 //
 
@@ -36,9 +45,21 @@ function compileToUmd (name) {
   })
 }
 
-function copyHtmlFiles (files) {
+function copyHtmlFiles (name) {
+  const source = `src/${name}`
+  const target = `${destDirectory}/${name}`
   return new Promise((resolve, reject) => {
-    copyfiles(files)
+    var rd = fs.createReadStream(source)
+    rd.on('error', rejectCleanup)
+    var wr = fs.createWriteStream(target)
+    wr.on('error', rejectCleanup)
+    function rejectCleanup (err) {
+      rd.destroy()
+      wr.end()
+      reject(err)
+    }
+    wr.on('finish', resolve)
+    rd.pipe(wr)
   })
 }
 

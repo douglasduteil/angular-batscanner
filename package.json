@@ -6,7 +6,9 @@
   "private": true,
   "scripts": {
     "lerna": "lerna",
-    "lint": "eslint . --cache"
+    "lint": "eslint . --cache",
+    "start": "lerna run start",
+    "test": "lerna run test"
   },
   "keywords": [],
   "author": "Douglas Duteil <douglasduteil@gmail.com> (douglasduteil.github.io)",

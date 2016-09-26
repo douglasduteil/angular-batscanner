@@ -28,6 +28,7 @@ export const BATSCANNER_PROVIDERS = [
   {provide: CompileMetadataResolver, useClass: BatScannerCompileMetadataResolver},
   {provide: BatscannerEventEmitter, useClass: BatscannerWindowPostMessageEmitter},
 
+  //
 
   BatscannerEventAggregator
 ]
