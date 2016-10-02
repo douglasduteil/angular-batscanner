@@ -48,6 +48,7 @@ function aggregateUntill (source, componentToken) {
 
   const hasCheckedTheRootComponent =
     rootComponentAfterViewChecked.bind(null, componentToken)
+  let latestComponentState = {}
 
   return Observable.create(aggregationObservable)
 
@@ -59,7 +60,20 @@ function aggregateUntill (source, componentToken) {
 
     // Must be the first to subscribe to source to buffer any incoming events
     const buffer$ = source
+      .map(function (event) {
+        const latestState = latestComponentState[event.id] || latestComponentState[event.id + 1]
+        if (latestState) {
+          latestState.endTime = event.timestamp
+          latestState.duration = latestState.startTime - event.timestamp
+        }
+        event.startTime = event.timestamp
+
+        latestComponentState[event.id] = event
+
+        return event
+      })
       .buffer(everyRootComponentAfterViewChecked)
+      .do(() => { latestComponentState = {} })
       .subscribe((e) => observer.next(e))
 
     // Listen to the source for AfterViewChecked AFTER buffering stuff
@@ -68,6 +82,7 @@ function aggregateUntill (source, componentToken) {
       .subscribe(() => everyRootComponentAfterViewChecked.next())
 
     return function () {
+      observer.complete()
       buffer$.dispose()
       closingNotifier$.dispose()
     }
