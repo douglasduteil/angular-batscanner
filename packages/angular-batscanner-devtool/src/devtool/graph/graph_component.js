@@ -44,7 +44,7 @@ Component({
     }
 
     .axis line {
-      stroke-opacity: 0.3;
+      stroke-opacity: .1;
       shape-rendering: crispEdges;
     }
 
@@ -120,25 +120,22 @@ Component({
       .domain([0, 1000])
       .range([0, width])
 
-    const y = d3.scaleLinear()
-      .domain([0, 100])
-      .range([0, height])
-
     const xAxis = d3.axisBottom(x)
       .ticks(13)
-
-    const yAxis = d3.axisRight(y)
+      .tickPadding(2 - height)
+      .tickSize(height)
 
     const viewport = svg.append('g')
         .attr('class', 'viewport')
 
+    svg.append('rect')
+      .attr('width', width)
+      .attr('height', 13)
+      .attr('fill', d3.color('rgba(255, 255, 255, 0.4)'))
+
     const gX = svg.append('g')
         .attr('class', 'axis axis--x')
         .call(xAxis)
-
-    const gY = svg.append('g')
-        .attr('class', 'axis axis--y')
-        .call(yAxis)
 
     this._flames = viewport.append('g')
         .attr('class', 'flames')
@@ -148,9 +145,9 @@ Component({
     //
 
     function zoomed () {
+      d3.event.transform.y = 0
       viewport.attr('transform', d3.event.transform)
       gX.call(xAxis.scale(d3.event.transform.rescaleX(x)))
-      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)))
     }
 
     function resize () {
@@ -158,18 +155,12 @@ Component({
       const height = svgElement.clientHeight
 
       x.range([0, width])
-      y.range([0, height])
 
       xAxis
+      .tickPadding(2 - height)
       .tickSize(height)
-      .tickPadding(8 - height)
-
-      yAxis
-      .tickSize(width)
-      .tickPadding(8 - width)
 
       gX.call(xAxis.scale(x))
-      gY.call(yAxis.scale(y))
     }
   },
 
@@ -177,7 +168,6 @@ Component({
     if (!state || !this._flames) {
       return
     }
-
 
     const c10c = d3.scaleOrdinal(d3.schemeCategory10)
     const itemHeight = 20
@@ -220,7 +210,7 @@ Component({
       .append('rect')
       .attr('width', (d) => this.axisScale(d.endTime) - this.axisScale(d.startTime))
       .attr('height', itemHeight)
-      .attr('fill', (d, i) => c10c(i))
+      .attr('fill', (d, i) => d3.rgb(c10c(i)).brighter(1.3))
 
       /*
       .style('stroke', '#fff')
