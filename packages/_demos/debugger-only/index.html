@@ -83,11 +83,23 @@
       constructor: function DebbugerOnlyDemoComponentDebbugerOnlyDemoAppComponent () {
       },
       ngOnInit () {
-        this.debuggerState$ = Observable.interval(1000)
-          .take(1)
-          .map(function () {
-            return [
+        const db = [
+          {
+            id: 0,
+            name: 'RootComponent'
+          }
+        ]
 
+        this.debuggerState$ = Observable.interval(1000)
+          .map(function () {
+            const timestamp = window.performance.now()
+            return db.map(function (event) {
+              return Object.assign({}, event, {
+                timestamp: timestamp
+              })
+            })
+          })
+/*
   {
     "id": 0,
     "timestamp": 267796.97500000003,
@@ -194,9 +206,7 @@
     "targetName": "TimerAppComponent",
     "startTime": 278585.765
   }
-
-            ]
-          })
+*/
       },
       ngOnDestroy () {
         this.debuggerState$.dispose()

@@ -47,6 +47,14 @@ Component({
   button:hover {
     color: #333;
   }
+
+  .recording {
+    color: red;
+  }
+  .recording:hover {
+    color: red;
+  }
+
   `],
   template: `
   <ng-content></ng-content>

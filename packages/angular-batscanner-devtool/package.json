@@ -20,7 +20,8 @@
     "del": "^2.2.2",
     "rollup": "^0.36.0",
     "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-image": "^1.0.2"
+    "rollup-plugin-image": "^1.0.2",
+    "rollup-plugin-string": "^2.0.2"
   },
   "dependencies": {
     "@angular/common": "^2.0.0",

@@ -33,39 +33,28 @@ Component({
   selector: 'bd-icon',
   styles: [`
   bd-icon {
-    color: #5a5a5a;
+    display: flex;
     height: 17px;
   }
 
-  bd-icon img {
-    height: 100%;
+  bd-icon svg {
+    flex: 1;
+    width: auto;
+    height: auto;
   }
   `],
   template: `
-  <ng-content></ng-content>
   `
 })
 .Class({
-  constructor: [ElementRef, Renderer, function IconButtonComponent (element, renderer) {
+  constructor: [ElementRef, function IconButtonComponent (element) {
     this._element = element
-    this._renderer = renderer
   }],
 
   ngOnChanges (changes) {
     const { svgIcon } = changes
-
     if (svgIcon) {
-      this._setSvgElement(ICONS[this.svgIcon])
+      this._element.nativeElement.innerHTML = ICONS[this.svgIcon] || ''
     }
-  },
-
-  _setSvgElement (svg) {
-    if (!svg) {
-      return
-    }
-
-    const layoutElement = this._element.nativeElement
-    this._renderer.detachView(Array.from(layoutElement.childNodes))
-    this._renderer.projectNodes(layoutElement, [svg])
   }
 })

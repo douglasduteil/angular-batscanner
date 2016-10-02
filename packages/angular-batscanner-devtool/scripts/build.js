@@ -4,7 +4,7 @@ const del = require('del')
 const camelCase = require('camel-case')
 const rollup = require('rollup')
 const babel = require('rollup-plugin-babel')
-const image = require('rollup-plugin-image')
+const string = require('rollup-plugin-string')
 
 const pkg = require('../package.json')
 
@@ -41,10 +41,12 @@ function compile (options) {
       entry: options.target,
       external: Object.keys(pkg.dependencies),
       plugins: [
+        string({
+          include: '**/*.svg'
+        }),
         babel({
           exclude: 'node_modules/**'
-        }),
-        image()
+        })
       ]
     })
     .then(bundle => bundle.write({
