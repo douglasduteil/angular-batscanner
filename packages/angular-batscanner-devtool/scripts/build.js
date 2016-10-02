@@ -4,6 +4,8 @@ const del = require('del')
 const camelCase = require('camel-case')
 const rollup = require('rollup')
 const babel = require('rollup-plugin-babel')
+const image = require('rollup-plugin-image')
+
 const pkg = require('../package.json')
 
 const destDirectory = 'lib'
@@ -41,15 +43,18 @@ function compile (options) {
       plugins: [
         babel({
           exclude: 'node_modules/**'
-        })
+        }),
+        image()
       ]
     })
     .then(bundle => bundle.write({
       globals: {
+        'd3': 'd3',
         'rxjs/Observable': 'Rx',
         'rxjs/Subject': 'Rx',
         '@angular/core': 'ng.core',
-        '@angular/compiler': 'ng.compiler'
+        '@angular/compiler': 'ng.compiler',
+        '@angular/platform-browser': 'ng.platformBrowser'
       },
       dest: `${destDirectory}/${options.dest}`,
       format: options.format,

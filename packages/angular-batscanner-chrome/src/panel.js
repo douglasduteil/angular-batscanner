@@ -20,23 +20,43 @@ export function connectToTab () {
 
 const BatscannerPanelComponent = Component({
   selector: 'batscanner-panel',
+  styles: [`
+  :host {
+    display: flex;
+    overflow: hidden;
+    flex-direction: column !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+  }
+
+  batscanner-debugger {
+    flex: 1;
+  }
+  `],
   template: `
-  <div>Hello batscanner-panel {{count}}</div>
-  <batscanner-debugger></batscanner-debugger>
+  <batscanner-debugger [state]="debuggerState$ | async"></batscanner-debugger>
   `
 })
 .Class({
   constructor: [NgZone, function BatscannerPanelComponent (ngZone) {
     this._ngZone = ngZone
-    this.count = 0
-  }],
 
+    this.state$ = new Subject()
+    this.debuggerState$ = this.state$
+      .filter((state) => state.type === 'data')
+
+    this.eventState$ = this.state$
+      .filter((state) => state.type === 'event')
+  }],
   ngOnInit () {
-    this.subscription = backendMessage$.subscribe(() => {
+    this.subscription = backendMessage$.subscribe((message) => {
       console.log('backend -> panel')
-      this._ngZone.run(() => {
-        this.count++
-      })
+      this.state$.next(message)
+      this._ngZone.run(() => {})
     })
 
     connectToTab()
@@ -53,7 +73,9 @@ const PanelModule = NgModule({
     window.ng.platformBrowser.BrowserModule,
     DevToolModule
   ],
-  declarations: [ BatscannerPanelComponent ],
+  declarations: [
+    BatscannerPanelComponent
+  ],
   bootstrap: [ BatscannerPanelComponent ]
 })
 .Class({constructor: function PanelModule () {}})

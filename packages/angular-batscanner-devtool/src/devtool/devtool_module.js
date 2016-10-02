@@ -1,17 +1,28 @@
 //
 
-const { ng } = window
+import {NgModule} from '@angular/core'
+import {BrowserModule} from '@angular/platform-browser'
 
-export const DevToolComponent = ng.core
-  .Component({
-    selector: 'batscanner-debugger',
-    template: '<h1>My Batscanner Debugger App</h1>'
-  })
-  .Class({constructor: function AppComponent () {}})
+import {GraphComponent} from './graph/graph_component.js'
+import {DevtoolComponent} from './devtool_component.js'
+import {IconComponent} from './icon_component.js'
+import {NavbarComponent} from './navbar_component.js'
 
-export const DevToolModule = ng.core.NgModule({
-  declarations: [ DevToolComponent ],
-  exports: [ DevToolComponent ],
-  imports: [ ng.platformBrowser.BrowserModule ]
+//
+
+export const DevToolModule =
+NgModule({
+  declarations: [
+    DevtoolComponent,
+    GraphComponent,
+    IconComponent,
+    NavbarComponent
+  ],
+  exports: [
+    DevtoolComponent
+  ],
+  imports: [
+    BrowserModule
+  ]
 })
 .Class({constructor: function DevToolModule () {}})

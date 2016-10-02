@@ -19,7 +19,8 @@
     "chokidar-cli": "^1.2.0",
     "del": "^2.2.2",
     "rollup": "^0.36.0",
-    "rollup-plugin-babel": "^2.6.1"
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-image": "^1.0.2"
   },
   "dependencies": {
     "@angular/common": "^2.0.0",
@@ -27,6 +28,7 @@
     "@angular/core": "^2.0.0",
     "@angular/platform-browser": "^2.0.0",
     "@angular/platform-browser-dynamic": "^2.0.0",
+    "d3": "^4.2.6",
     "reflect-metadata": "^0.1.8",
     "rxjs": "^5.0.0-beta.12",
     "zone.js": "^0.6.23"

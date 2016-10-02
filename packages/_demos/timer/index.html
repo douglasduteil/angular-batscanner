@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+
+  <script>document.write('<base href="' + document.location + '" />');</script>
+
   <title>_ Timer _ Angular 2 Batscanner _</title>
 </head>
 <body>
@@ -9,7 +12,7 @@
 
   -->
   <h1>Simple timer</h1>
-  <demo-timer></demo-timer>
+  <timer-app></timer-app>
   <!--
 
   -->
@@ -21,6 +24,8 @@
   <script src="../node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
   <script src="../node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
   <script src="../node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
+
+  <script src="../node_modules/@angular/router/bundles/router.umd.js"></script>
   <!--
 
   -->
@@ -46,13 +51,13 @@
         constructor: function TimerComponent () {}
       })
 
-    const AppComponent = ng.core
+    const DemoTimerComponent = ng.core
       .Component({
         selector: 'demo-timer',
         template: ' <timer [value]="timerValue"></timer>'
       })
       .Class({
-        constructor: function AppComponent () {
+        constructor: function DemoTimerComponent () {
           this.timerValue = 0
         },
         ngOnInit () {
@@ -65,11 +70,31 @@
         }
       })
 
+    const rooting = ng.router.RouterModule.forRoot([
+      { path: '', component: DemoTimerComponent }
+    ])
+
+    const TimerAppComponent = ng.core
+      .Component({
+        selector: 'timer-app',
+        template: ' <router-outlet></router-outlet>'
+      })
+      .Class({
+        constructor: function TimerAppComponent () {}
+      })
+
     const AppModule = ng.core
       .NgModule({
-        imports: [ ng.platformBrowser.BrowserModule ],
-        declarations: [ AppComponent, TimerComponent ],
-        bootstrap: [ AppComponent ],
+        imports: [
+          ng.platformBrowser.BrowserModule,
+          rooting
+        ],
+        declarations: [
+          TimerAppComponent,
+          DemoTimerComponent,
+          TimerComponent
+        ],
+        bootstrap: [ TimerAppComponent ],
         providers: [
         ]
       })
@@ -78,7 +103,7 @@
     const compilerOptions = {
       providers: [
         BATSCANNER_PROVIDERS,
-        {provide: BATSCANNER_ROOT_COMPONENT, useValue: AppComponent}
+        {provide: BATSCANNER_ROOT_COMPONENT, useValue: TimerAppComponent}
       ]
     }
 

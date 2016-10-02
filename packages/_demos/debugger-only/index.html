@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <script>document.write('<base href="' + document.location + '" />');</script>
+
+  <title>_ Debugger Only _ Angular 2 Batscanner _</title>
+</head>
+<body>
+  <!--
+
+  -->
+  <debbuger-only-demo-app></debbuger-only-demo-app>
+  <!--
+
+  -->
+  <script src="../node_modules/zone.js/dist/zone.js"></script>
+  <script src="../node_modules/reflect-metadata/Reflect.js"></script>
+  <script src="../node_modules/rxjs/bundles/Rx.js"></script>
+  <script src="../node_modules/@angular/core/bundles/core.umd.js"></script>
+  <script src="../node_modules/@angular/common/bundles/common.umd.js"></script>
+  <script src="../node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
+  <script src="../node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
+  <script src="../node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
+  <!--
+
+  -->
+  <!--
+
+  -->
+  <script src="../node_modules/d3/build/d3.js"></script>
+  <!--
+
+  -->
+  <script src="../node_modules/angular-batscanner-devtool/lib/angular-batscanner-devtool.umd.js"></script>
+  <!--
+
+  -->
+  <script>
+  (function () {
+    const {
+      ng,
+      Rx,
+      angularBatscannerDevtool
+    } = window
+
+    const {
+      Component,
+      NgModule,
+      ViewEncapsulation
+    } = ng.core
+    const {BrowserModule} = ng.platformBrowser
+    const {Observable} = Rx
+    const { DevToolModule } = angularBatscannerDevtool
+
+    const DebbugerOnlyDemoAppComponent =
+    Component({
+      encapsulation: ViewEncapsulation.Native,
+      selector: 'debbuger-only-demo-app',
+      styles: [`
+      :host {
+        display: flex;
+        overflow: hidden;
+        flex-direction: column !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 0;
+      }
+
+      batscanner-debugger {
+        flex: 1;
+      }
+      `],
+      template: `
+      <batscanner-debugger [state]="debuggerState$ | async"></batscanner-debugger>
+      `
+    })
+    .Class({
+      constructor: function DebbugerOnlyDemoComponentDebbugerOnlyDemoAppComponent () {
+      },
+      ngOnInit () {
+        this.debuggerState$ = Observable.interval(1000)
+          .map(function () {
+            return [
+              {
+                "id": 0,
+                "timestamp": 153736.77500000002,
+                "type": "DoCheck",
+                "targetName": "TimerAppComponent"
+              },
+              {
+                "id": 0,
+                "timestamp": 153736.79,
+                "type": "AfterContentChecked",
+                "targetName": "TimerAppComponent"
+              },
+              {
+                "id": 1,
+                "timestamp": 153736.795,
+                "type": "DoCheck",
+                "targetName": "RouterOutlet"
+              },
+              {
+                "id": 2,
+                "timestamp": 153736.80000000002,
+                "type": "DoCheck",
+                "targetName": "DemoTimerComponent"
+              },
+              {
+                "id": 2,
+                "timestamp": 153736.805,
+                "type": "AfterContentChecked",
+                "targetName": "DemoTimerComponent"
+              },
+              {
+                "id": 3,
+                "timestamp": 153736.85,
+                "type": "OnChanges",
+                "targetName": "TimerComponent",
+                "changes": {
+                  "time": {
+                    "previousValue": 152,
+                    "currentValue": 153
+                  }
+                }
+              },
+              {
+                "id": 3,
+                "timestamp": 153736.85,
+                "type": "DoCheck",
+                "targetName": "TimerComponent"
+              },
+              {
+                "id": 3,
+                "timestamp": 153736.85,
+                "type": "AfterContentChecked",
+                "targetName": "TimerComponent"
+              },
+              {
+                "id": 3,
+                "timestamp": 153736.92500000002,
+                "type": "AfterViewChecked",
+                "targetName": "TimerComponent"
+              },
+              {
+                "id": 2,
+                "timestamp": 153736.93,
+                "type": "AfterViewChecked",
+                "targetName": "DemoTimerComponent"
+              },
+              {
+                "id": 1,
+                "timestamp": 153736.945,
+                "type": "AfterContentChecked",
+                "targetName": "RouterOutlet"
+              },
+              {
+                "id": 1,
+                "timestamp": 153736.945,
+                "type": "AfterViewChecked",
+                "targetName": "RouterOutlet"
+              },
+              {
+                "id": 0,
+                "timestamp": 153736.95,
+                "type": "AfterViewChecked",
+                "targetName": "TimerAppComponent"
+              }
+            ]
+          })
+      },
+      ngOnDestroy () {
+        this.debuggerState$.dispose()
+      }
+    })
+
+    const DebbugerOnlyDemoAppModule =
+    NgModule({
+      imports: [
+        BrowserModule,
+        DevToolModule
+      ],
+      declarations: [
+        DebbugerOnlyDemoAppComponent
+      ],
+      bootstrap: [
+        DebbugerOnlyDemoAppComponent
+      ],
+      providers: [
+      ]
+    })
+    .Class({constructor: function DebbugerOnlyDemoAppModule () {}})
+
+    //
+
+    document.addEventListener('DOMContentLoaded', function () {
+      ng.platformBrowserDynamic
+        .platformBrowserDynamic()
+        .bootstrapModule(DebbugerOnlyDemoAppModule)
+    })
+  }())
+    /* eslint-disable no-trailing-spaces, eol-last */
+  </script>
+  <!--
+
+  -->
+</body>
+</html>
