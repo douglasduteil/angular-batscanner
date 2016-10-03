@@ -59,7 +59,7 @@ Component({
       .switchMap((e) => {
         return this.stateSource$
           .scan((memo, val) => {
-            return memo.concat([val])
+            return memo.concat(val).concat([null])
           }, [])
           .do((latest) => { this.graphState = latest })
           .startWith(this.graphState)

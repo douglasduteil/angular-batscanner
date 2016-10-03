@@ -16,20 +16,20 @@
   <!--
 
   -->
-  <script src="../node_modules/zone.js/dist/zone.js"></script>
-  <script src="../node_modules/reflect-metadata/Reflect.js"></script>
-  <script src="../node_modules/rxjs/bundles/Rx.js"></script>
-  <script src="../node_modules/@angular/core/bundles/core.umd.js"></script>
-  <script src="../node_modules/@angular/common/bundles/common.umd.js"></script>
-  <script src="../node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
-  <script src="../node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
-  <script src="../node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
+  <script src="../../node_modules/zone.js/dist/zone.js"></script>
+  <script src="../../node_modules/reflect-metadata/Reflect.js"></script>
+  <script src="../../node_modules/rxjs/bundles/Rx.js"></script>
+  <script src="../../node_modules/@angular/core/bundles/core.umd.js"></script>
+  <script src="../../node_modules/@angular/common/bundles/common.umd.js"></script>
+  <script src="../../node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
+  <script src="../../node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
+  <script src="../../node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
 
-  <script src="../node_modules/@angular/router/bundles/router.umd.js"></script>
+  <script src="../../node_modules/@angular/router/bundles/router.umd.js"></script>
   <!--
 
   -->
-  <script src="../node_modules/angular-batscanner-core/lib/angular-batscanner-core.umd.js"></script>
+  <script src="../../node_modules/angular-batscanner-core/lib/angular-batscanner-core.umd.js"></script>
   <!--
 
   -->
@@ -54,7 +54,16 @@
     const DemoTimerComponent = ng.core
       .Component({
         selector: 'demo-timer',
-        template: ' <timer [value]="timerValue"></timer>'
+        template: `
+          <timer [value]="timerValue"></timer>
+          <timer [value]="timerValue"></timer>
+          <timer [value]="timerValue"></timer>
+          <timer [value]="timerValue"></timer>
+          <timer [value]="timerValue"></timer>
+          <timer [value]="timerValue"></timer>
+          <timer [value]="timerValue"></timer>
+          <timer [value]="timerValue"></timer>
+        `
       })
       .Class({
         constructor: function DemoTimerComponent () {

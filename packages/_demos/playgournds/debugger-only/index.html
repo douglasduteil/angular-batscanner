@@ -15,25 +15,25 @@
   <!--
 
   -->
-  <script src="../node_modules/zone.js/dist/zone.js"></script>
-  <script src="../node_modules/reflect-metadata/Reflect.js"></script>
-  <script src="../node_modules/rxjs/bundles/Rx.js"></script>
-  <script src="../node_modules/@angular/core/bundles/core.umd.js"></script>
-  <script src="../node_modules/@angular/common/bundles/common.umd.js"></script>
-  <script src="../node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
-  <script src="../node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
-  <script src="../node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
+  <script src="../../node_modules/zone.js/dist/zone.js"></script>
+  <script src="../../node_modules/reflect-metadata/Reflect.js"></script>
+  <script src="../../node_modules/rxjs/bundles/Rx.js"></script>
+  <script src="../../node_modules/@angular/core/bundles/core.umd.js"></script>
+  <script src="../../node_modules/@angular/common/bundles/common.umd.js"></script>
+  <script src="../../node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
+  <script src="../../node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
+  <script src="../../node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
   <!--
 
   -->
   <!--
 
   -->
-  <script src="../node_modules/d3/build/d3.js"></script>
+  <script src="../../node_modules/d3/build/d3.js"></script>
   <!--
 
   -->
-  <script src="../node_modules/angular-batscanner-devtool/lib/angular-batscanner-devtool.umd.js"></script>
+  <script src="../../node_modules/angular-batscanner-devtool/lib/angular-batscanner-devtool.umd.js"></script>
   <!--
 
   -->
@@ -84,18 +84,32 @@
       },
       ngOnInit () {
         const db = [
-          {
-            id: 0,
-            name: 'RootComponent'
-          }
+          [
+            {id: 0, name: 'RootComponent'},
+            {id: 1, name: 'DumbComponent'},
+            {id: 1, name: 'DumbComponent'},
+            {id: 0, name: 'RootComponent'}
+          ],
+          [
+            {id: 0, name: 'RootComponent'},
+            {id: 1, name: 'DumbComponent'},
+            {id: 2, name: 'FooComponent'},
+            {id: 2, name: 'FooComponent'},
+            {id: 2, name: 'FooComponent'},
+            {id: 1, name: 'DumbComponent'},
+            {id: 0, name: 'RootComponent'}
+          ]
         ]
 
         this.debuggerState$ = Observable.interval(1000)
           .map(function () {
+            const serieIndex = Math.floor(Math.random() * db.length)
+            const serie = db[serieIndex]
+            const wait = Math.floor(Math.random() * (1000 / serie.length))
             const timestamp = window.performance.now()
-            return db.map(function (event) {
+            return serie.map(function (event, i) {
               return Object.assign({}, event, {
-                timestamp: timestamp
+                timestamp: timestamp + (i * wait)
               })
             })
           })

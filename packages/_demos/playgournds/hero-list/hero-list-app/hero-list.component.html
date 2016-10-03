@@ -1,0 +1,17 @@
+<h2>Hero List</h2>
+
+<p><i>Pick a hero from the list</i></p>
+<ul>
+  <li *ngFor="let hero of heroes" (click)="selectHero(hero)">
+    {{hero.name}}
+  </li>
+</ul>
+
+<hero-detail *ngIf="selectedHero" [hero]="selectedHero"></hero-detail>
+
+
+<!-- 
+Copyright 2016 Google Inc. All Rights Reserved.
+Use of this source code is governed by an MIT-style license that
+can be found in the LICENSE file at http://angular.io/license
+-->
