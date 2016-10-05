@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <script>
+  document.write('<base href="' + document.location + '" />')
+  /* eslint-disable no-trailing-spaces, eol-last */
+  </script>
+
+  <title>_ Business Game _ Angular 2 Batscanner _</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+  <style>
+    background: #000;
+  </style>
+</head>
+<body>
+  <!--
+
+  -->
+  <style>
+    business-game-app {
+      position: absolute;
+      top: 0; bottom: 0; left: 0; right: 0;
+      display: flex;
+    }
+  </style>
+  <business-game-app>
+  </business-game-app>
+
+  <style>
+    bizg-loader {
+      position: absolute;
+      top: 0; bottom: 0; left: 0; right: 0;
+      z-index: -1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 1s;
+    }
+
+    bizg-loader > img{
+      flex:
+    }
+  </style>
+  <bizg-loader>
+    <img src="images/Business_Men_Gang.gif" alt="">
+  </bizg-loader>
+  <!--
+
+  -->
+  <script src="../../node_modules/zone.js/dist/zone.js"></script>
+  <script src="../../node_modules/reflect-metadata/Reflect.js"></script>
+  <script src="../../node_modules/rxjs/bundles/Rx.js"></script>
+  <script src="../../node_modules/@angular/core/bundles/core.umd.js"></script>
+  <script src="../../node_modules/@angular/common/bundles/common.umd.js"></script>
+  <script src="../../node_modules/@angular/compiler/bundles/compiler.umd.js"></script>
+  <script src="../../node_modules/@angular/platform-browser/bundles/platform-browser.umd.js"></script>
+  <script src="../../node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js"></script>
+
+  <script src="../../node_modules/@angular/router/bundles/router.umd.js"></script>
+  <!--
+
+  -->
+  <script src="../../node_modules/@angular/forms/bundles/forms.umd.js"></script>
+  <script src="../../node_modules/angular-batscanner-core/lib/angular-batscanner-core.umd.js"></script>
+  <!--
+
+  -->
+  <script src="./lib/business-game-app.umd.js"></script>
+  <!--
+
+  -->
+  <script>
+  (function () {
+    const { ng, angularBatscannerCore, businessGameApp } = window
+
+    //
+
+    const {
+      BATSCANNER_PROVIDERS,
+      BATSCANNER_ROOT_COMPONENT
+    } = angularBatscannerCore
+
+    const {BusinessGameAppModule, BusinessGameAppComponent} = businessGameApp
+
+    //
+
+    const compilerOptions = {
+      providers: [
+        BATSCANNER_PROVIDERS,
+        {provide: BATSCANNER_ROOT_COMPONENT, useValue: BusinessGameAppComponent}
+      ]
+    }
+
+    //
+
+    document.addEventListener('DOMContentLoaded', function () {
+      ng.platformBrowserDynamic
+        .platformBrowserDynamic()
+        .bootstrapModule(BusinessGameAppModule, compilerOptions)
+    })
+  }())
+    /* eslint-disable no-trailing-spaces, eol-last */
+  </script>
+  <!--
+
+  -->
+</body>
+</html>

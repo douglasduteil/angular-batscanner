@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
 
-  <script>document.write('<base href="' + document.location + '" />');</script>
+  <script>
+  document.write('<base href="' + document.location + '" />')
+  /* eslint-disable no-trailing-spaces, eol-last */
+  </script>
 
   <title>_ Timer _ Angular 2 Batscanner _</title>
 </head>
@@ -56,13 +59,6 @@
         selector: 'demo-timer',
         template: `
           <timer [value]="timerValue"></timer>
-          <timer [value]="timerValue"></timer>
-          <timer [value]="timerValue"></timer>
-          <timer [value]="timerValue"></timer>
-          <timer [value]="timerValue"></timer>
-          <timer [value]="timerValue"></timer>
-          <timer [value]="timerValue"></timer>
-          <timer [value]="timerValue"></timer>
         `
       })
       .Class({
@@ -86,7 +82,7 @@
     const TimerAppComponent = ng.core
       .Component({
         selector: 'timer-app',
-        template: ' <router-outlet></router-outlet>'
+        template: '<demo-timer></demo-timer>'//'<router-outlet></router-outlet>'
       })
       .Class({
         constructor: function TimerAppComponent () {}
@@ -96,7 +92,7 @@
       .NgModule({
         imports: [
           ng.platformBrowser.BrowserModule,
-          rooting
+         // rooting
         ],
         declarations: [
           TimerAppComponent,

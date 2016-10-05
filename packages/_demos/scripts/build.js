@@ -12,19 +12,25 @@ const pkg = require('../package.json')
 //
 
 const destDirectory = 'lib'
-const baseDirectory = 'playgournds'
+const baseDirectory = 'playgrounds'
 const scriptToBuild = [
   {
     base: 'hero-list',
     file: 'hero-list-app/hero-list-app.module.js',
     name: 'hero-list-app'
+  },
+  {
+    base: 'business-game',
+    file: 'src/business-game-app.module.js',
+    name: 'business-game-app'
   }
 ]
 
 Promise.resolve()
-  .then(() => del([].map(
+  .then(() => del(scriptToBuild.concat(
     (meta) => `${baseDirectory}/${meta.base}/${destDirectory}`
   )))
+  .catch(console.error)
   .then(() => Promise.all(
     [].concat(scriptToBuild.map(compileToUmd))
   ))
