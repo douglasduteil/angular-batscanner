@@ -61,19 +61,29 @@ function aggregateUntill (source, componentToken) {
     // Must be the first to subscribe to source to buffer any incoming events
     const buffer$ = source
       .map(function (event) {
-        const latestState = latestComponentState[event.id] || latestComponentState[event.id + 1]
+        const latestState = latestComponentState[event.id]
         if (latestState) {
-          latestState.endTime = event.timestamp
-          latestState.duration = latestState.startTime - event.timestamp
+          latestState.next = event.timestamp
+          event.previous = latestState.timestamp
+          latestState.duration = latestState.next - latestState.timestamp
         }
-        event.startTime = event.timestamp
 
         latestComponentState[event.id] = event
 
         return event
       })
       .buffer(everyRootComponentAfterViewChecked)
-      .do(() => { latestComponentState = {} })
+      .do((events) => {
+        latestComponentState = {}
+      })
+      .map((events) => {
+        const start = (events[0] || {}).timestamp || 0
+        const end = (events[events.length - 1] || {}).timestamp || 0
+        return {
+          duration: end - start,
+          events
+        }
+      })
       .subscribe((e) => observer.next(e))
 
     // Listen to the source for AfterViewChecked AFTER buffering stuff

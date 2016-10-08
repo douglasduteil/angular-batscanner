@@ -46,11 +46,47 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
 
     this._eventEmitter = _injector.get(BatscannerEventEmitter)
     this.isDirective = (type) => Boolean(_directiveResolver.resolve(type, false))
+    this.isPipe = (type) => Boolean(_pipeResolver.resolve(type, false))
   }
 
   getTypeMetadata (directiveType, moduleUrl, dependencies) {
+    const emitter = this._eventEmitter
     directiveType = resolveForwardRef(directiveType)
 
+    if (this.isPipe(directiveType) && needToBeScaned(directiveType)) {
+      markAsScaned(directiveType)
+      console.log('hooks on pipe ', directiveType.name)
+      const existingTransform = directiveType.prototype.transform
+      if (!existingTransform) {
+        return super.getTypeMetadata(directiveType, moduleUrl, dependencies)
+      }
+      directiveType.prototype.transform = function transformBatScanner () {
+        console.log('ngPipeTransform', directiveType.name, Array.from(arguments))
+        const start = window.performance.now()
+        const result = existingTransform.call(this, ...arguments)
+        const end = window.performance.now()
+
+        //
+
+        if (!this[BATSCANNER_ID]) {
+          this[BATSCANNER_ID] = GLOBAL_ID++
+        }
+        emitter.next({
+          id: this[BATSCANNER_ID],
+          end,
+          start,
+          timestamp: window.performance.now(),
+          type: 'ngPipeTransform',
+          targetName: directiveType.name,
+          target: directiveType,
+          arguments: Array.from(arguments)
+        })
+
+        return result
+      }
+
+      return super.getTypeMetadata(directiveType, moduleUrl, dependencies)
+    }
     if (!this.isDirective(directiveType) || !needToBeScaned(directiveType)) {
       return super.getTypeMetadata(directiveType, moduleUrl, dependencies)
     }
@@ -58,34 +94,31 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
     //
 
     markAsScaned(directiveType)
+    console.log('hooks on directive ', directiveType.name)
 
     //
 
-    const emitter = this._eventEmitter
     directiveType.prototype = LIFECYCLE_HOOKS_VALUES.reduce(function (proto, lifecycleHook) {
       const lifecycleHookName = LifecycleHooks[lifecycleHook]
-      let existingHook = proto[`ng${lifecycleHookName}`]
-
-      if (lifecycleHook === LifecycleHooks.OnInit) {
-        const originalHook = proto.ngOnInit
-        proto.ngOnInit = function ngOnInitBatScanner () {
-          this[BATSCANNER_ID] = GLOBAL_ID++
-          if (originalHook) {
-            originalHook.call(this)
-          }
-        }
-
-        existingHook = proto.ngOnInit
-      }
+      const existingHook = proto[`ng${lifecycleHookName}`]
 
       proto[`ng${lifecycleHookName}`] = function (changes) {
+        console.log(`ng${lifecycleHookName}`, directiveType.name, Array.from(arguments))
+        const start = window.performance.now()
         if (existingHook) {
           existingHook.call(this, changes)
+        }
+        const end = window.performance.now()
+
+        if (!this[BATSCANNER_ID]) {
+          this[BATSCANNER_ID] = GLOBAL_ID++
         }
 
         emitter.next({
           id: this[BATSCANNER_ID],
-          timestamp: window.performance.now(),
+          end,
+          start,
+          timestamp: start,
           type: lifecycleHookName,
           targetName: directiveType.name,
           target: directiveType,
