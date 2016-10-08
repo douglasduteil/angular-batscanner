@@ -16,7 +16,7 @@ const baseDirectory = 'playgrounds'
 const scriptToBuild = [
   {
     base: 'hero-list',
-    file: 'hero-list-app/hero-list-app.module.js',
+    file: 'src/app.module.js',
     name: 'hero-list-app'
   },
   {
@@ -27,7 +27,7 @@ const scriptToBuild = [
 ]
 
 Promise.resolve()
-  .then(() => del(scriptToBuild.concat(
+  .then(() => del(scriptToBuild.map(
     (meta) => `${baseDirectory}/${meta.base}/${destDirectory}`
   )))
   .catch(console.error)
