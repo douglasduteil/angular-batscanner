@@ -45,12 +45,13 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
     )
 
     this._eventEmitter = _injector.get(BatscannerEventEmitter)
+    this.isDirective = (type) => Boolean(_directiveResolver.resolve(type, false))
   }
 
   getTypeMetadata (directiveType, moduleUrl, dependencies) {
     directiveType = resolveForwardRef(directiveType)
 
-    if (!needToBeScaned(directiveType)) {
+    if (!this.isDirective(directiveType) || !needToBeScaned(directiveType)) {
       return super.getTypeMetadata(directiveType, moduleUrl, dependencies)
     }
 
