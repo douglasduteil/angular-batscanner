@@ -18,5 +18,7 @@ Component({
     this.heroes = this.service.getHeroes()
   },
 
-  selectHero (hero) { this.selectedHero = hero }
+  selectHero (hero) {
+    this.selectedHero = (this.selectedHero === hero) ? null : hero
+  }
 })
