@@ -1,2 +1,4 @@
 node_modules
 bundles
+
+/packages/_demos/playgrounds/*/lib
