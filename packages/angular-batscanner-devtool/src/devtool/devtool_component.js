@@ -48,21 +48,29 @@ Component({
   constructor: [function DevtoolComponent () {}],
 
   ngOnInit () {
-    this.isRecording = false
+    this.isRecording = true
     this.graphState = []
 
     this.stateSource$ = new Subject()
     this.closingNotifier$ = new Subject()
 
+    /*
     this.graphState$ = this.closingNotifier$
       .startWith(null)
       .switchMap((e) => {
         return this.stateSource$
           .scan((memo, val) => {
-            return memo.concat(val).concat([null])
+            return memo.concat(val)//.concat([null])
           }, [])
           .do((latest) => { this.graphState = latest })
           .startWith(this.graphState)
+      })
+    */
+
+    this.graphState$ = this.closingNotifier$
+      .startWith(null)
+      .switchMap((e) => {
+        return this.stateSource$
       })
   },
 

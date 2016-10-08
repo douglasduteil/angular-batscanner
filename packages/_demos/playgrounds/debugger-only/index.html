@@ -333,6 +333,8 @@
         this.debuggerState$ = new Subject()
         this.done = false
 
+        const timestamp = window.performance.now()
+        let latestTimestamp = timestamp
         generateEvents(db)
 
         //
@@ -342,21 +344,23 @@
             return
           }
 
-          const timestamp = window.performance.now()
-
           const serieIndex = Math.floor(Math.random() * events.length)
           const abstractSerie = db[serieIndex]
-          const duration = Math.floor(Math.random() * (1000 / abstractSerie.length))
+          const duration = Math.random() * 1000
 
           const generatedSerie = abstractSerie.map(function (event, i) {
+            const eventTimestamp = latestTimestamp
+            latestTimestamp += duration
             return Object.assign({}, event, {
-              timestamp: timestamp + (i * duration)
+              duration: duration,
+              endTime: latestTimestamp,
+              timestamp: eventTimestamp
             })
           })
 
           self.debuggerState$.next(generatedSerie)
 
-          let nextEvent = duration + 1000
+          let nextEvent = duration
           const generateEventsFn = generateEvents.bind(null, events)
           setTimeout(generateEventsFn, nextEvent)
         }
