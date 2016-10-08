@@ -53,14 +53,14 @@
       BATSCANNER_ROOT_COMPONENT
     } = angularBatscannerCore
 
-    const {HeroListAppModule, HeroListAppComponent} = heroListApp
+    const {HeroListAppModule, AppComponent} = heroListApp
 
     //
 
     const compilerOptions = {
       providers: [
         BATSCANNER_PROVIDERS,
-        {provide: BATSCANNER_ROOT_COMPONENT, useValue: HeroListAppComponent}
+        {provide: BATSCANNER_ROOT_COMPONENT, useValue: AppComponent}
       ]
     }
 

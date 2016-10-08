@@ -10,6 +10,7 @@ import { HeroService } from './hero.service.js'
 import { BackendService } from './backend.service.js'
 import { Logger } from './logger.service.js'
 
+export {AppComponent}
 export const HeroListAppModule = NgModule({
   imports: [
     BrowserModule,
