@@ -14,14 +14,18 @@ import * as d3 from 'd3'
 //
 
 const LIKECYCLE_HOOKS = [
-  'AfterContentChecked',
-  'AfterContentInit',
-  'AfterViewChecked',
-  'AfterViewInit',
-  'DoCheck',
   'OnChanges',
-  'OnInit'
+  'OnInit',
+  'DoCheck',
+  'AfterContentInit',
+  'AfterContentChecked',
+  'AfterViewInit',
+  'AfterViewChecked',
+  'ngOnDestroy'
 ]
+const itemHeight = 2
+const textMargin = 0.05
+const minimalMilliscondToDisplayText = 200
 
 //
 
@@ -254,7 +258,7 @@ Component({
       .attr('class', 'timeline-overview-activity')
 
     timelineOverview
-      .append('g')
+    .append('g')
       .attr('class', 'axis axis--x')
       .call(overviewXAxis)
       .attr('text-anchor', 'end')
@@ -262,50 +266,33 @@ Component({
       .attr('x', '-5')
 
     timelineOverview
-      .append('g')
+    .append('g')
       .attr('class', 'brush')
       .call(brush)
 
     //
 
     timelineDetail
-      .append('g')
+    .append('g')
       .attr('class', 'axis axis--x')
       .call(detailXAxis)
       .attr('text-anchor', 'end')
     .selectAll('text')
       .attr('x', '-5')
 
-    //
-
-/*
-
-    timelineOverview
-      .append('g')
-      .attr('class', 'axis axis--x')
-      .call(xAxis)
-
-    //
-
-    svg.append('g')
-
-    svg.append('g')
-    .attr('class', 'axis axis--y')
-    .call(yAxis)
-
-    this.flamechart = svg.append('g')
-      .attr('class', 'flamechart')
-      .attr('transform', 'translate(0, 50)')
-
-    this.rectangles = svg.append('g')
+    this.rectangles = timelineDetail.append('g')
       .attr('class', 'rectangles')
-      .attr('transform', 'translate(0, 50)')
+      .attr('transform', 'translate(0, 20)')
 
-    svg.append('g')
-      .attr('class', 'brush')
-      .call(brush)
-      .call(brush.move, x.range())
-*/
+    this.tooltip = d3.select(tooltipElement)
+      .style('position', 'absolute')
+      .style('z-index', '10')
+      .style('visibility', 'hidden')
+      .style('background-color', '#fff')
+      .style('padding', '5px 10px')
+      .text('')
+
+    const renderBlocks = this._renderBlocks.bind(this)
     //
 
     function brushed () {
@@ -316,13 +303,14 @@ Component({
       if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return // ignore brush-by-zoom
 
       var s = d3.event.selection || overviewX.range()
-      x.domain(s.map(overviewX.invert, overviewX))
+      detailX.domain(s.map(overviewX.invert, overviewX))
 
       //detailViewPort.attr('d', area)
       timelineDetail.select('.axis--x').call(detailXAxis)
       // svg.select('.zoom').call(zoom.transform, d3.zoomIdentity
       //   .scale(width / (s[1] - s[0]))
       //   .translate(-s[0], 0))
+      renderBlocks()
     }
 
     function resize () {
@@ -356,15 +344,19 @@ Component({
 
     const {overviewArea, detailArea, overviewActivity} = this
     const {color, flamechart, svg, x, xAxis, yAxis} = this
-    var y = this.overviewArea.y
+    var {y: overviewAreaY, x: overviewAreaX} = this.overviewArea
+    var {y: detailAreaY, x: detailAreaX} = this.detailArea
 
     const minmaxdomain = d3.extent([]
-      .concat(d3.extent(data, (d) => d.timestamp - 1000))
-      .concat(d3.extent(data, (d) => d.timestamp + (d.duration || 1) + 1000))
+      .concat(d3.extent(data, (d) => d.timestamp))
+      .concat(d3.extent(data, (d) => d.timestamp + (d.duration || 1)))
     )
 
-    x.domain(minmaxdomain)
-    y.domain([Math.max(d3.max(data, (d) => d.depth), 20), 0])
+    overviewAreaX.domain(minmaxdomain)
+    overviewAreaY.domain([Math.max(d3.max(data, (d) => d.depth), 20), 0])
+    detailAreaX.domain(minmaxdomain)
+    detailAreaY.domain([0, Math.max(d3.max(data, (d) => d.depth), 20)])
+
     svg.select('.timeline-overview').selectAll('.axis--x').call(overviewArea.xAxis)
     svg.select('.timeline-details').selectAll('.axis--x').call(detailArea.xAxis)
 
@@ -376,9 +368,9 @@ Component({
     var series = stack(proporstionData)
 
     var area = d3.area()
-    .x(function (d) { return x(d.data.timestamp) })
-    .y0(function (d) { return y(d[0]) })
-    .y1(function (d) { return y(d[1]) })
+    .x(function (d) { return overviewAreaX(d.data.timestamp) })
+    .y0(function (d) { return overviewAreaY(d[0]) })
+    .y1(function (d) { return overviewAreaY(d[1]) })
     .curve(d3.curveMonotoneX)
     // .curve(d3.curveNatural)
     /* .x(function(d) { return x(d.x); })
@@ -393,110 +385,64 @@ Component({
       .attr('d', area)
       .style('fill', (d, i) => d3.rgb(color(i)).brighter(1.5))
 
-    return
-
     //
 
-    // const {color, flamechart, svg, x, xAxis, y, yAxis, detailArea} = this
-    const itemHeight = 50
-    const textMargin = 5
+    this._renderBlocks()
+  },
 
-    // const minmaxdomain = d3.extent([]
-    //   .concat(d3.extent(data, (d) => d.timestamp - 1000))
-    //   .concat(d3.extent(data, (d) => d.timestamp + (d.duration || 1) + 1000))
-    // )
-    x.domain(minmaxdomain)
-    y.domain([0, Math.max(d3.max(data, (d) => d.depth), 10)])
-    svg.select('.axis--x').call(xAxis)
-    svg.select('.axis--y').call(yAxis)
-
+  _renderBlocks () {
+    const {color, tooltip, detailArea: {x, y}} = this
     const minX = x.domain()[0]
-    console.log(x(minX + 1000))
+
     var selection = this.rectangles
       .selectAll('.block')
-      .data(data)
+      .data(this.data)
 
-    var newSection = selection.enter()
-    var newBlock = newSection
-    .append('g')
+    var newBlock = selection
+    .enter()
+      .append('g')
       .attr('class', 'block')
 
-    newBlock.merge(selection)
-      .attr('transform', (d, i) => `translate(${x(d.timestamp)}, ${y(d.depth)})`)
+    newBlock
+      .merge(selection)
+      .attr('transform', (d, i) => `translate(${x(d.timestamp)}, ${y(d.depth * itemHeight)})`)
 
-    newBlock.append('rect')
-      .merge(newSection.selectAll('rect'))
-      .attr('fill', (d, i) => d3.rgb(color(d.type)).brighter(1.5))
-      .attr('height', (d) => y(1))
+    selection.selectAll('rect')
       .attr('width', (d) => x(minX + (d.duration || 1)))
 
     newBlock
-      .append('foreignObject')
-      .append('xhtml:div')
+    .append('rect')
+      .attr('fill', (d, i) => d3.rgb(color(d.type)).brighter(1.5))
+      .attr('height', (d) => y(itemHeight))
+      .attr('width', (d) => x(minX + (d.duration || 1)))
+      .on('mouseover', () => tooltip.style('visibility', 'visible'))
+      .on('mousemove', (d) => tooltip
+        .style('left', `${d3.event.pageX + 10}px`)
+        .style('top', `${d3.event.pageY + 10}px`)
+        .text(`${(d.duration || 0).toFixed(2)} ms - ${d.type} @ ${d.targetName}`)
+      )
+      .on('mouseout', () => tooltip.style('visibility', 'hidden'))
+
+
+    newBlock
+    .append('foreignObject')
+      .attr('height', (d) => y(itemHeight))
+      .attr('width', (d) => x(minX + (d.duration || 1)))
+    .append('xhtml:div')
       .attr('class', 'label')
-      .merge(newSection.selectAll('.label'))
-      .style('display', (d) => (x(minX + (d.duration || 1)) < 50) ? 'none' : 'block')
-      .attr('x', (d) => textMargin)
-      .attr('y', (d) => itemHeight * (2.25 / 3))
+      .style('display', (d) => (x(minX + (d.duration || 1)) < minimalMilliscondToDisplayText) ? 'none' : 'block')
       .attr('fill', '#000')
       .text((d) => `${d.type} @ ${d.targetName}`)
-  },
 
-  _renderr () {
-    const data = this.data
-    console.log('_render', data)
-    if (!this.flamechart) {
-      return
-    }
-
-    const {color, flamechart, svg, x, xAxis} = this
-    const itemHeight = 50
-    const textMargin = 5
-
-    const startTime = d3.min(data, (d) => d.timestamp)
-    const endTime = d3.max(data, (d) => d.timestamp)
-    x.domain([startTime - 2000, endTime + 2000])
-    svg.select('.axis').call(xAxis)
-
-    //
-
-    const newSections = flamechart.selectAll('g.section')
-      .data(data)
-
-    newSections.exit().remove()
-
-    newSections
-      .enter()
-      .append('rect')
-      .merge(newSections)
-      .attr('width', (d) => x(x.domain()[0] + d.duration))
-      .attr('height', itemHeight)
-      .attr('fill', (d, i) => d3.rgb(color(d.type)).brighter(1.5))
-      .style('stroke', '#fff')
-      .style('stroke-width', 1)
-
-    // const block = newSections
-    // .merge(newSections.selectAll('.block'))
-    //   .attr('transform', (d, i) => `translate(${x(d.start)}, ${d.id * itemHeight})`)
-
-    // block
-    //   .append('rect')
-    //   .attr('width', (d) => x(x.domain()[0] + d.duration))
-    //   .attr('height', itemHeight)
-    //   .attr('fill', (d, i) => d3.rgb(color(d.type)).brighter(1.5))
-    //   .style('stroke', '#fff')
-    //   .style('stroke-width', 1)
-
-    // newSections
-    //   .append('foreignObject')
-    //   .append('xhtml:div')
-    //   .attr('class', 'label')
-    //   .style('display', (d) => (x(x.domain()[0] + d.duration) < 100) ? 'none' : 'block')
-    //   .attr('x', (d) => textMargin)
-    //   .attr('y', (d) => itemHeight * (2.25 / 3))
-    //   .attr('fill', '#000')
-    //   .text((d) => `${d.type} @ ${d.name}`)
+    selection.selectAll('foreignObject')
+      .attr('height', (d) => y(itemHeight))
+      .attr('width', (d) => x(minX + (d.duration || 1)))
+    selection.selectAll('.label')
+      .style('display', (d) => (x(minX + (d.duration || 1)) < minimalMilliscondToDisplayText) ? 'none' : 'block')
+      .attr('fill', '#000')
+      .text((d) => `${d.type} @ ${d.targetName}`)
   }
+
   //
 })
 
