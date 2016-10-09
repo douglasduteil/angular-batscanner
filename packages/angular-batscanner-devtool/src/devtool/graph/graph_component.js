@@ -92,37 +92,28 @@ Component({
   }],
 
   ngOnChanges (changes) {
-    if (changes.state && this._render) {
-      const lastest = this.data[this.data.length - 1] || {
-        timestamp: 1000 + (Math.random() * 1000),
-        duration: 1000 + (Math.random() * 1000)
-      }
-      var data = [1, 2, 4, 2, 1]
-      var maxDeph = data.reduce((memo, val) => {
-        if (memo.indexOf(val) <= -1) { memo.push(val) }
-        return memo
-      }, [])
-      console.log(maxDeph)
-      var depth = d3.scaleLinear()
-        .domain(d3.extent(data))
-        .range([0, maxDeph.length - 1, 1])
-        .interpolate(d3.interpolateRound)
-        .clamp(true)
-
-      const statee = data.reduce(function (memo, val) {
-        const lastValue = (memo[memo.length - 1] || lastest)
-        memo.push({
-          timestamp: lastValue.timestamp + lastValue.duration,
-          duration: 1000 + (Math.random() * 1000),
-          depth: depth(val)
-        })
-        return memo
-      }, [])
-
-      statee.forEach((e) => { this.data.push(e) })
-
-      this._render()
+    if (!(changes.state)) {
+      return
     }
+
+    var data = this.state || []
+    var maxDeph = data.reduce((memo, e) => {
+      if (Number.isNaN(Number(memo[e.id]))) {
+        memo[e.id] = memo.length
+        memo.length += 1
+      }
+      return memo
+    }, {length: 0})
+
+    var depth = (id) => maxDeph[id]
+
+    const statee = data.map(function (e) {
+      return Object.assign({}, e, {depth: depth(e.id)})
+    })
+
+    statee.forEach((e) => { this.data.push(e) })
+
+    this._render()
   },
 
   ngAfterViewInit () {
@@ -178,29 +169,48 @@ Component({
       return
     }
     const {color, flamechart, svg, x, xAxis, y, yAxis} = this
+    const itemHeight = 50
+    const textMargin = 5
 
     const minmaxdomain = d3.extent([]
       .concat(d3.extent(data, (d) => d.timestamp - 1000))
-      .concat(d3.extent(data, (d) => d.timestamp + d.duration + 1000))
+      .concat(d3.extent(data, (d) => d.timestamp + (d.duration || 1) + 1000))
     )
     x.domain(minmaxdomain)
-    y.domain([0, Math.max(data.length, 10)])
+    y.domain([0, Math.max(d3.max(data, (d) => d.depth), 10)])
     svg.select('.axis--x').call(xAxis)
     svg.select('.axis--y').call(yAxis)
 
     const minX = x.domain()[0]
+    console.log(x(minX + 1000))
     var selection = this.rectangles
-      .selectAll('.bar')
+      .selectAll('.block')
       .data(data)
 
-    selection.enter()
-      .append('rect')
-      .attr('class', 'bar')
-      .merge(selection)
-       .attr('transform', (d, i) => `translate(${x(d.timestamp)}, ${y(d.depth)})`)
-      .attr('fill', (d, i) => d3.rgb(color(i)).brighter(1.5))
+    var newSection = selection.enter()
+    var newBlock = newSection
+    .append('g')
+      .attr('class', 'block')
+
+    newBlock.merge(selection)
+      .attr('transform', (d, i) => `translate(${x(d.timestamp)}, ${y(d.depth)})`)
+
+    newBlock.append('rect')
+      .merge(newSection.selectAll('rect'))
+      .attr('fill', (d, i) => d3.rgb(color(d.type)).brighter(1.5))
       .attr('height', (d) => y(1))
-      .attr('width', (d) => x(minX + d.duration))
+      .attr('width', (d) => x(minX + (d.duration || 1)))
+
+    newBlock
+      .append('foreignObject')
+      .append('xhtml:div')
+      .attr('class', 'label')
+      .merge(newSection.selectAll('.label'))
+      .style('display', (d) => (x(minX + (d.duration || 1)) < 50) ? 'none' : 'block')
+      .attr('x', (d) => textMargin)
+      .attr('y', (d) => itemHeight * (2.25 / 3))
+      .attr('fill', '#000')
+      .text((d) => `${d.type} @ ${d.targetName}`)
   },
 
   _renderr () {
