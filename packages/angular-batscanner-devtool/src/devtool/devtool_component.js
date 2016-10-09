@@ -34,11 +34,20 @@ Component({
      (click)="toggleRecord()"
      class="btn-toolbar"
      [class.recording]="isRecording"
+     title="Record"
     >
       <bd-icon svgIcon="record"></bd-icon>
     </button>
+    <button
+     (click)="clearRecording(graph)"
+     class="btn-toolbar"
+     title="Clear recording"
+    >
+      <bd-icon svgIcon="cancel"></bd-icon>
+    </button>
   </bd-navbar>
   <bd-graph
+   #graph="bdGraph"
    [state]="graphState$ | async"
   >
   </bd-graph>
@@ -81,6 +90,14 @@ Component({
     }
     //console.log('DevtoolComponent#ngOnChanges', this.state)
     this.stateSource$.next(this.state)
+  },
+
+  //
+
+  clearRecording (graph) {
+    graph.data = []
+    graph.proporstionData = []
+    graph._render()
   },
 
   toggleRecord () {

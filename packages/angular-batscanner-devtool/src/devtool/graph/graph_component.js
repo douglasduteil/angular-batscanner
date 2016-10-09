@@ -25,7 +25,7 @@ const LIKECYCLE_HOOKS = [
 ]
 const itemHeight = 25
 const textMargin = 0.05
-const minimalMilliscondToDisplayText = 100
+const minimalMilliscondToDisplayText = 25
 
 //
 
@@ -33,6 +33,7 @@ export const RootSvgGraphComponent =
 Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Native,
+  exportAs: 'bdGraph',
   inputs: [
     'state'
   ],
@@ -233,13 +234,10 @@ Component({
     this.detailArea = {}
     let detailX
     const x = detailX = this.x = this.detailArea.x = d3.scaleLinear().domain([0, 1000]).range([0, width])
-    const detailY = this.detailArea.y = d3.scaleLinear().domain([0, 10]).range([0, height])
     const detailXAxis = this.detailArea.xAxis = d3.axisBottom(detailX)
       .tickFormat((p) => d3.format('d')(p) + ' ms')
       .tickSizeInner(detailAreaHeight)
       .tickPadding(5 - detailAreaHeight)
-
-    const detailYAxis = this.detailArea.yAxis = d3.axisLeft(detailY)
 
     this.overviewArea = {}
     this.overviewArea.y = d3.scaleLinear()
@@ -256,8 +254,6 @@ Component({
     const brush = d3.brushX()
       .extent([[0, 0], [width, overviewAreaHeight]])
       .on('brush end', brushed)
-
-    let brushLastSelection = detailX.range()
 
     //
 
@@ -365,7 +361,7 @@ Component({
     const {overviewArea, detailArea, overviewActivity} = this
     const {color, flamechart, svg, x, xAxis, yAxis} = this
     var {y: overviewAreaY, x: overviewAreaX} = this.overviewArea
-    var {y: detailAreaY, x: detailAreaX} = this.detailArea
+    var {x: detailAreaX} = this.detailArea
 
     const minmaxdomain = d3.extent([]
       .concat(d3.extent(data, (d) => d.timestamp))
@@ -375,7 +371,6 @@ Component({
     overviewAreaX.domain(minmaxdomain)
     overviewAreaY.domain([Math.max(d3.max(data, (d) => d.depth), 20), 0])
     detailAreaX.domain(minmaxdomain)
-    detailAreaY.domain([0, Math.max(d3.max(data, (d) => d.depth), 20)])
 
     svg.select('.timeline-overview').selectAll('.axis--x').call(overviewArea.xAxis)
     svg.select('.timeline-details').selectAll('.axis--x').call(detailArea.xAxis)
@@ -400,6 +395,7 @@ Component({
     var paths = overviewActivity.selectAll('path')
       .data(series)
 
+    paths.exit().remove()
     paths.enter().append('path')
       .merge(paths)
       .attr('d', area)
@@ -411,13 +407,13 @@ Component({
   },
 
   _renderBlocks () {
-    const {color, tooltip, detailArea: {x, y}} = this
+    const {color, tooltip, detailArea: {x}} = this
     const minX = x.domain()[0]
 
     var selection = this.rectangles
       .selectAll('.block')
       .data(this.data)
-
+    selection.exit().remove()
     var newBlock = selection
     .enter()
       .append('g')
@@ -442,7 +438,6 @@ Component({
         .text(`${(d.duration || 0).toFixed(2)} ms - ${d.type} @ ${d.targetName}`)
       )
       .on('mouseout', () => tooltip.style('visibility', 'hidden'))
-
 
     newBlock
     .append('foreignObject')
@@ -486,7 +481,3 @@ export const GraphComponent = [
 ]
 
 //
-
-function flameGraph () {
-  console.log('d3 flamegraph')
-}
