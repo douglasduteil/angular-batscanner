@@ -70,6 +70,7 @@ Component({
     this.graphState$ = this.closingNotifier$
       .startWith(null)
       .switchMap((e) => {
+        console.log('DevtoolComponent : listening to this.stateSource$')
         return this.stateSource$
       })
   },
@@ -78,7 +79,7 @@ Component({
     if (!this.isRecording) {
       return
     }
-
+    console.log('DevtoolComponent#ngOnChanges', this.state)
     this.stateSource$.next(this.state)
   },
 
