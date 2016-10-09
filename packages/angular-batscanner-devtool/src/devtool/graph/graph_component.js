@@ -150,8 +150,7 @@ Component({
       this.rootTime = (this.data[0] || data[0] || {}).timestamp
     }
     const relativeTime = this.rootTime
-    console.log('data', data)
-    console.log('relativeTime', relativeTime)
+
     if (!relativeTime) {
       return
     }
@@ -177,7 +176,7 @@ Component({
         }
         const startTimestamp = data[0].timestamp - relativeTime
         const endTimestamp = data[data.length - 1].timestamp - relativeTime
-        console.log(startTimestamp, endTimestamp)
+
         this.proporstionData.push(
           LIKECYCLE_HOOKS.reduce(
             (memo, val) => Object.assign(memo, {[val]: 0}),
@@ -210,7 +209,6 @@ Component({
   //
 
   _initializeGraph (svgElement, tooltipElement) {
-    console.log('_initializeGraph', svgElement, tooltipElement)
     const margin = {top: 90, right: 0, bottom: 30, left: 0}
 
     const svg = this.svg = d3.select(svgElement)
@@ -352,8 +350,6 @@ Component({
   _render () {
     const data = this.data
     const proporstionData = this.proporstionData
-    console.log('_render data', data.slice(0))
-    console.log('_render proporstionData', proporstionData.slice(0))
     if (!this.detailArea) {
       return
     }
@@ -387,11 +383,7 @@ Component({
     .y0(function (d) { return overviewAreaY(d[0]) })
     .y1(function (d) { return overviewAreaY(d[1]) })
     .curve(d3.curveMonotoneX)
-    // .curve(d3.curveNatural)
-    /* .x(function(d) { return x(d.x); })
-    .y0(function(d) { return y(d.y0); })
-    .y1(function(d) { return y(d.y0 + d.y); }); */
-    console.log(series)
+
     var paths = overviewActivity.selectAll('path')
       .data(series)
 
