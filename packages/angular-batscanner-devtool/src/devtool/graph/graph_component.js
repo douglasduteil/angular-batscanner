@@ -54,7 +54,7 @@ Component({
     .axis path,
     .axis line {
       fill: none;
-      stroke: #000;
+      stroke: #dadada;
       shape-rendering: crispEdges;
     }
 
@@ -80,9 +80,6 @@ Component({
       pointer-events: all;
     }
 
-    .timeline-overview > .axis > .tick > line {
-      stroke: #dadada;
-    }
   `],
   queries: {
     svgElement: new ViewChild('mySvg'),
@@ -210,17 +207,24 @@ Component({
     //
 
     this.detailArea = {}
-    const detailX = this.x = this.detailArea.x = d3.scaleLinear().domain([0, 1000]).range([0, width])
+    let detailX
+    const x = detailX = this.x = this.detailArea.x = d3.scaleLinear().domain([0, 1000]).range([0, width])
     const detailY = this.detailArea.y = d3.scaleLinear().domain([0, 10]).range([0, height])
     const detailXAxis = this.detailArea.xAxis = d3.axisBottom(detailX)
+      .tickFormat((p) => d3.format('d')(p) + ' ms')
+      .tickSizeInner(detailAreaHeight)
+      .tickPadding(5 - detailAreaHeight)
+
     const detailYAxis = this.detailArea.yAxis = d3.axisLeft(detailY)
 
     this.overviewArea = {}
     this.overviewArea.y = d3.scaleLinear()
-      .domain([0, 10])
+      .domain([10, 0])
       .range([0, overviewAreaHeight])
       .clamp(true)
-    const overviewXAxis = this.overviewArea.xAxis = d3.axisBottom(detailX)
+
+    const overviewX = this.overviewArea.x = d3.scaleLinear().domain([0, 1000]).range([0, width])
+    const overviewXAxis = this.overviewArea.xAxis = d3.axisBottom(overviewX)
       .tickFormat((p) => d3.format('d')(p) + ' ms')
       .tickSizeInner(overviewAreaHeight)
       .tickPadding(5 - overviewAreaHeight)
@@ -264,6 +268,16 @@ Component({
 
     //
 
+    timelineDetail
+      .append('g')
+      .attr('class', 'axis axis--x')
+      .call(detailXAxis)
+      .attr('text-anchor', 'end')
+    .selectAll('text')
+      .attr('x', '-5')
+
+    //
+
 /*
 
     timelineOverview
@@ -298,7 +312,17 @@ Component({
       if (!(d3.event && d3.event.type === 'brush')) {
         return // ignore no brush events
       }
-      brushLastSelection = d3.event.selection
+
+      if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return // ignore brush-by-zoom
+
+      var s = d3.event.selection || overviewX.range()
+      x.domain(s.map(overviewX.invert, overviewX))
+
+      //detailViewPort.attr('d', area)
+      timelineDetail.select('.axis--x').call(detailXAxis)
+      // svg.select('.zoom').call(zoom.transform, d3.zoomIdentity
+      //   .scale(width / (s[1] - s[0]))
+      //   .translate(-s[0], 0))
     }
 
     function resize () {
@@ -306,9 +330,17 @@ Component({
       const height = svgElement.clientHeight
 
       detailX.range([0, width])
+
+      overviewXAxis.tickSizeInner(overviewAreaHeight)
+      overviewXAxis.tickPadding(5 - overviewAreaHeight)
+      const detailAreaHeight = height - overviewArea.top - overviewArea.bottom
+      detailXAxis.tickSizeInner(detailAreaHeight)
+      detailXAxis.tickPadding(5 - detailAreaHeight)
+
       brush.extent([[0, 0], [width, overviewAreaHeight]])
 
       timelineOverview.select('.axis').call(overviewXAxis)
+      timelineDetail.select('.axis').call(detailXAxis)
       // timelineOverview.call(yAxis.scale(y))
     }
   },
@@ -322,7 +354,7 @@ Component({
       return
     }
 
-    const {overviewArea, overviewActivity} = this
+    const {overviewArea, detailArea, overviewActivity} = this
     const {color, flamechart, svg, x, xAxis, yAxis} = this
     var y = this.overviewArea.y
 
@@ -333,7 +365,8 @@ Component({
 
     x.domain(minmaxdomain)
     y.domain([Math.max(d3.max(data, (d) => d.depth), 20), 0])
-    svg.selectAll('.axis--x').call(overviewArea.xAxis)
+    svg.select('.timeline-overview').selectAll('.axis--x').call(overviewArea.xAxis)
+    svg.select('.timeline-details').selectAll('.axis--x').call(detailArea.xAxis)
 
     var stack = d3.stack()
     .keys(LIKECYCLE_HOOKS)
