@@ -161,7 +161,7 @@
           const duration = 1000 + (Math.random() * 5000)
 
           const generatedSerie = abstractSerie.map(function (event, i) {
-            console.log('latestTimestamp', Math.floor(latestTimestamp))
+            // console.log('latestTimestamp', Math.floor(latestTimestamp))
             const eventTimestamp = latestTimestamp
             latestTimestamp += duration
             return Object.assign({}, event, {
@@ -171,7 +171,7 @@
               timestamp: eventTimestamp
             })
           })
-          console.log('generatedSerie', generatedSerie)
+          // console.log('generatedSerie', generatedSerie)
           self.debuggerState$.next(generatedSerie)
 
           const generateEventsFn = generateEvents.bind(null, events)
