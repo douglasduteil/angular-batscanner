@@ -23,9 +23,9 @@ const LIKECYCLE_HOOKS = [
   'AfterViewChecked',
   'ngOnDestroy'
 ]
-const itemHeight = 2
+const itemHeight = 25
 const textMargin = 0.05
-const minimalMilliscondToDisplayText = 200
+const minimalMilliscondToDisplayText = 100
 
 //
 
@@ -72,16 +72,36 @@ Component({
       stroke-width: 2.5px;
     }
 
-    .dot {
-      fill: white;
-      stroke: steelblue;
-      stroke-width: 1.5px;
-    }
-
     .zoom {
       cursor: move;
       fill: none;
       pointer-events: all;
+    }
+
+    rect {
+      stroke: #EEEEEE;
+      fill-opacity: .8;
+    }
+
+    rect:hover {
+      stroke: #474747;
+      stroke-width: 0.5;
+    }
+
+    .label {
+      pointer-events: none;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      font-size: 12px;
+      font-family: Verdana;
+      margin-left: 4px;
+      margin-right: 4px;
+      line-height: 1.5;
+      padding: 0 0 0;
+      font-weight: 400;
+      color: black;
+      text-align: left;
     }
 
   `],
@@ -405,7 +425,7 @@ Component({
 
     newBlock
       .merge(selection)
-      .attr('transform', (d, i) => `translate(${x(d.timestamp)}, ${y(d.depth * itemHeight)})`)
+      .attr('transform', (d, i) => `translate(${x(d.timestamp)}, ${d.depth * itemHeight})`)
 
     selection.selectAll('rect')
       .attr('width', (d) => x(minX + (d.duration || 1)))
@@ -413,7 +433,7 @@ Component({
     newBlock
     .append('rect')
       .attr('fill', (d, i) => d3.rgb(color(d.type)).brighter(1.5))
-      .attr('height', (d) => y(itemHeight))
+      .attr('height', (d) => itemHeight)
       .attr('width', (d) => x(minX + (d.duration || 1)))
       .on('mouseover', () => tooltip.style('visibility', 'visible'))
       .on('mousemove', (d) => tooltip
@@ -426,7 +446,7 @@ Component({
 
     newBlock
     .append('foreignObject')
-      .attr('height', (d) => y(itemHeight))
+      .attr('height', (d) => itemHeight)
       .attr('width', (d) => x(minX + (d.duration || 1)))
     .append('xhtml:div')
       .attr('class', 'label')
@@ -435,7 +455,6 @@ Component({
       .text((d) => `${d.type} @ ${d.targetName}`)
 
     selection.selectAll('foreignObject')
-      .attr('height', (d) => y(itemHeight))
       .attr('width', (d) => x(minX + (d.duration || 1)))
     selection.selectAll('.label')
       .style('display', (d) => (x(minX + (d.duration || 1)) < minimalMilliscondToDisplayText) ? 'none' : 'block')
