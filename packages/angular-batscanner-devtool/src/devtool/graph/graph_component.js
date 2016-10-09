@@ -209,7 +209,7 @@ Component({
   //
 
   _initializeGraph (svgElement, tooltipElement) {
-    const margin = {top: 90, right: 0, bottom: 30, left: 0}
+    const margin = {top: 90, right: 0, bottom: 0, left: 0}
 
     const svg = this.svg = d3.select(svgElement)
     d3.select(window).on('resize', resize)
@@ -253,6 +253,12 @@ Component({
       .extent([[0, 0], [width, overviewAreaHeight]])
       .on('brush end', brushed)
 
+    var zoom = d3.zoom()
+      .scaleExtent([1, Infinity])
+      .translateExtent([[0, 0], [width, height]])
+      .extent([[0, 0], [width, height]])
+      .on('zoom', zoomed)
+
     //
 
     const timelineOverview = svg
@@ -294,6 +300,12 @@ Component({
     .selectAll('text')
       .attr('x', '-5')
 
+    timelineDetail.append('rect')
+      .attr('class', 'zoom')
+      .attr('width', width)
+      .attr('height', height)
+      .call(zoom)
+
     this.rectangles = timelineDetail.append('g')
       .attr('class', 'rectangles')
       .attr('transform', 'translate(0, 20)')
@@ -305,6 +317,7 @@ Component({
       .style('background-color', '#fff')
       .style('padding', '5px 10px')
       .text('')
+
 
     const renderBlocks = this._renderBlocks.bind(this)
     //
@@ -321,9 +334,23 @@ Component({
 
       //detailViewPort.attr('d', area)
       timelineDetail.select('.axis--x').call(detailXAxis)
-      // svg.select('.zoom').call(zoom.transform, d3.zoomIdentity
-      //   .scale(width / (s[1] - s[0]))
-      //   .translate(-s[0], 0))
+      timelineDetail.select('.zoom').call(zoom.transform, d3.zoomIdentity
+        .scale(width / (s[1] - s[0]))
+        .translate(-s[0], 0))
+      renderBlocks()
+    }
+
+    function zoomed () {
+      if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'brush') return // ignore zoom-by-brush
+
+      var t = d3.event.transform
+      detailX.domain(t.rescaleX(overviewX).domain())
+      timelineDetail.select('.axis--x').call(detailXAxis)
+      timelineOverview.select('.brush').call(
+        brush.move,
+        detailX.range().map(t.invertX, t)
+      )
+
       renderBlocks()
     }
 
