@@ -48,7 +48,7 @@ const BatscannerPanelComponent = Component({
     this.state$ = new Subject()
     this.debuggerState$ = this.state$
       .filter((state) => state.type === 'data')
-      .map((state) => state.data)
+      .map((state) => state.data.events)
 
     this.eventState$ = this.state$
       .filter((state) => state.type === 'event')

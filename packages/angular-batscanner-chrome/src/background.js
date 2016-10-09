@@ -20,6 +20,11 @@ function onConnectToExtensionBackend (port) {
 
   ports[tab][name] = port
 
+  if (name === 'devtools' && !ports[tab].contentScript) {
+    console.log(`new ${name} for tab n°${tab}`)
+    installContentScript(tab)
+  }
+
   if (ports[tab].devtools && ports[tab].contentScript) {
     console.log('devtools <- backend ' + tab + ' -> content-script')
     doublePipe(ports[tab])
@@ -66,8 +71,6 @@ function resolveAsDevtool (port) {
   const tab = Number(port.name)
   const name = 'devtools'
 
-  console.log(`new ${name} for tab n°${tab}`)
-  installContentScript(tab)
   return { tab, name }
 }
 
