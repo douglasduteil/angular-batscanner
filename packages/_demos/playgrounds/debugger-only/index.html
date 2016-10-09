@@ -61,6 +61,27 @@
 
     const db = [
       [
+        {id: 0, targetName: 'RootComponent', type: 'OnInit'},
+        {id: 0, targetName: 'RootComponent', type: 'DoCheck'},
+        {id: 0, targetName: 'RootComponent', type: 'AfterContentInit'},
+        {id: 0, targetName: 'RootComponent', type: 'AfterContentChecked'},
+        {id: 1, targetName: 'ViewComponent', type: 'OnInit'},
+        {id: 1, targetName: 'ViewComponent', type: 'DoCheck'},
+        {id: 1, targetName: 'ViewComponent', type: 'AfterContentInit'},
+        {id: 1, targetName: 'ViewComponent', type: 'AfterContentChecked'},
+        {id: 2, targetName: 'DumbComponent', type: 'OnChanges'},
+        {id: 1, targetName: 'DumbComponent', type: 'OnInit'},
+        {id: 2, targetName: 'DumbComponent', type: 'DoCheck'},
+        {id: 2, targetName: 'DumbComponent', type: 'AfterContentInit'},
+        {id: 2, targetName: 'DumbComponent', type: 'AfterContentChecked'},
+        {id: 2, targetName: 'DumbComponent', type: 'AfterViewInit'},
+        {id: 2, targetName: 'DumbComponent', type: 'AfterViewChecked'},
+        {id: 1, targetName: 'ViewComponent', type: 'AfterViewInit'},
+        {id: 1, targetName: 'ViewComponent', type: 'AfterViewChecked'},
+        {id: 0, targetName: 'RootComponent', type: 'AfterViewInit'},
+        {id: 0, targetName: 'RootComponent', type: 'AfterViewChecked'}
+      ],
+      [
         {id: 0, targetName: 'RootComponent', type: 'DoCheck'},
         {id: 0, targetName: 'RootComponent', type: 'AfterContentChecked'},
         {id: 1, targetName: 'ViewComponent', type: 'DoCheck'},
@@ -127,7 +148,7 @@
         const timestamp = window.performance.now()
         let latestTimestamp = timestamp
         generateEvents(db)
-
+        setTimeout(() => { self.done = true }, 5000)
         //
 
         function generateEvents (events) {
@@ -137,23 +158,23 @@
 
           const serieIndex = Math.floor(Math.random() * events.length)
           const abstractSerie = db[serieIndex]
-          const duration = Math.random() * 1000
+          const duration = 1000 + (Math.random() * 5000)
 
           const generatedSerie = abstractSerie.map(function (event, i) {
             const eventTimestamp = latestTimestamp
             latestTimestamp += duration
             return Object.assign({}, event, {
               duration: duration,
-              endTime: latestTimestamp,
+              end: latestTimestamp,
+              start: eventTimestamp,
               timestamp: eventTimestamp
             })
           })
 
           self.debuggerState$.next(generatedSerie)
 
-          let nextEvent = duration
           const generateEventsFn = generateEvents.bind(null, events)
-          setTimeout(generateEventsFn, nextEvent)
+          setTimeout(generateEventsFn, 1000)
         }
       },
 
