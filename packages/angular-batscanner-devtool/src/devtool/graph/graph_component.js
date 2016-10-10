@@ -318,8 +318,8 @@ Component({
       .style('padding', '5px 10px')
       .text('')
 
-
     const renderBlocks = this._renderBlocks.bind(this)
+    const render = this._render.bind(this)
     //
 
     function brushed () {
@@ -359,6 +359,7 @@ Component({
       const height = svgElement.clientHeight
 
       detailX.range([0, width])
+      overviewX.range([0, width])
 
       overviewXAxis.tickSizeInner(overviewAreaHeight)
       overviewXAxis.tickPadding(5 - overviewAreaHeight)
@@ -366,11 +367,18 @@ Component({
       detailXAxis.tickSizeInner(detailAreaHeight)
       detailXAxis.tickPadding(5 - detailAreaHeight)
 
-      brush.extent([[0, 0], [width, overviewAreaHeight]])
+      timelineOverview.select('.brush')
+        .call(brush.extent([[0, 0], [width, overviewAreaHeight]]))
+
+      zoom
+        .translateExtent([[0, 0], [width, height]])
+        .extent([[0, 0], [width, height]])
+      timelineDetail.select('.zoom').attr('width', width)
 
       timelineOverview.select('.axis').call(overviewXAxis)
       timelineDetail.select('.axis').call(detailXAxis)
-      // timelineOverview.call(yAxis.scale(y))
+
+      render()
     }
   },
 
