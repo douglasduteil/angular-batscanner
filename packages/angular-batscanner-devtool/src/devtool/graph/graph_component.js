@@ -3,7 +3,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Directive,
   ElementRef,
   ViewChild,
   ViewEncapsulation
@@ -24,7 +23,6 @@ const LIKECYCLE_HOOKS = [
   'ngOnDestroy'
 ]
 const itemHeight = 25
-const textMargin = 0.05
 const minimalMilliscondToDisplayText = 25
 
 //
@@ -230,8 +228,7 @@ Component({
     //
 
     this.detailArea = {}
-    let detailX
-    const x = detailX = this.x = this.detailArea.x = d3.scaleLinear().domain([0, 1000]).range([0, width])
+    const detailX = this.detailArea.x = d3.scaleLinear().domain([0, 1000]).range([0, width])
     const detailXAxis = this.detailArea.xAxis = d3.axisBottom(detailX)
       .tickFormat((p) => d3.format('d')(p) + ' ms')
       .tickSizeInner(detailAreaHeight)
@@ -374,6 +371,7 @@ Component({
         .translateExtent([[0, 0], [width, height]])
         .extent([[0, 0], [width, height]])
       timelineDetail.select('.zoom').attr('width', width)
+      timelineDetail.select('.zoom').attr('height', detailAreaHeight)
 
       timelineOverview.select('.axis').call(overviewXAxis)
       timelineDetail.select('.axis').call(detailXAxis)
@@ -390,7 +388,7 @@ Component({
     }
 
     const {overviewArea, detailArea, overviewActivity} = this
-    const {color, flamechart, svg, x, xAxis, yAxis} = this
+    const {color, svg} = this
     var {y: overviewAreaY, x: overviewAreaX} = this.overviewArea
     var {x: detailAreaX} = this.detailArea
 
@@ -487,24 +485,10 @@ Component({
   //
 })
 
-const BrushXComponent =
-Directive({
-  selector: '[bd-brush-x]'
-})
-.Class({
-  constructor: [ElementRef, function RootSvgGraphComponent (elementRef) {
-    this._element = elementRef.nativeElement
-  }],
-
-  ngOnInit () {
-  }
-})
-
 //
 
 export const GraphComponent = [
-  RootSvgGraphComponent,
-  BrushXComponent
+  RootSvgGraphComponent
 ]
 
 //
