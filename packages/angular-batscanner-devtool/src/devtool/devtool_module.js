@@ -21,8 +21,8 @@ NgModule({
     DevtoolComponent
   ],
   imports: [
-    GraphModule,
-    BrowserModule
+    BrowserModule,
+    GraphModule
   ]
 })
 .Class({constructor: function DevToolModule () {}})

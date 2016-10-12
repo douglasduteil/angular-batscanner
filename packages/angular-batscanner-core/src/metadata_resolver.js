@@ -55,13 +55,13 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
 
     if (this.isPipe(directiveType) && needToBeScaned(directiveType)) {
       markAsScaned(directiveType)
-      console.log('hooks on pipe ', directiveType.name)
+      // console.log('hooks on pipe ', directiveType.name)
       const existingTransform = directiveType.prototype.transform
       if (!existingTransform) {
         return super.getTypeMetadata(directiveType, moduleUrl, dependencies)
       }
       directiveType.prototype.transform = function transformBatScanner () {
-        console.log('ngPipeTransform', directiveType.name, Array.from(arguments))
+        // console.log('ngPipeTransform', directiveType.name, Array.from(arguments))
         const start = window.performance.now()
         const result = existingTransform.call(this, ...arguments)
         const end = window.performance.now()
@@ -94,7 +94,7 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
     //
 
     markAsScaned(directiveType)
-    console.log('hooks on directive ', directiveType.name)
+    // console.log('hooks on directive ', directiveType.name)
 
     //
 
@@ -103,7 +103,7 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
       const existingHook = proto[`ng${lifecycleHookName}`]
 
       proto[`ng${lifecycleHookName}`] = function (changes) {
-        console.log(`ng${lifecycleHookName}`, directiveType.name, Array.from(arguments))
+        // console.log(`ng${lifecycleHookName}`, directiveType.name, Array.from(arguments))
         const start = window.performance.now()
         if (existingHook) {
           existingHook.call(this, changes)

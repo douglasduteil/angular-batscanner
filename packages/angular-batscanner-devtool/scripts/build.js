@@ -56,6 +56,7 @@ function compile (options) {
         'rxjs/Subject': 'Rx',
         '@angular/core': 'ng.core',
         '@angular/compiler': 'ng.compiler',
+        '@angular/common': 'ng.common',
         '@angular/platform-browser': 'ng.platformBrowser'
       },
       dest: `${destDirectory}/${options.dest}`,

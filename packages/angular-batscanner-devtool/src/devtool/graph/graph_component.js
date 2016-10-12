@@ -10,6 +10,8 @@ import {
   NgZone
 } from '@angular/core'
 
+import {Observable} from 'rxjs/Observable'
+
 import * as d3 from 'd3'
 
 //
@@ -27,10 +29,196 @@ const LIKECYCLE_HOOKS = [
 const itemHeight = 25
 const minimalMilliscondToDisplayText = 25
 
-const log = console.log.bind(null, 'RootSvgGraphComponent#')
+const log = console.log.bind(null, '%cRootSvgGraphComponent%c#', 'color: #1abc9c', 'color: #333')
 //
 
 export const RootSvgGraphComponent =
+Component({
+  exportAs: 'bdGraph',
+  inputs: [
+    'state'
+  ],
+  queries: {
+    overview: new ViewChild('overview'),
+    svgElement: new ViewChild('rootSvg'),
+    tooltipElement: new ViewChild('myTooltip')
+  },
+  selector: 'bd-graph',
+  styles: [`
+    :host {
+      display: flex;
+    }
+
+    svg {
+      flex: 1;
+    }
+  `],
+  template: `
+    <svg
+     #rootSvg
+     xmlns="http://www.w3.org/2000/svg"
+     version="1.1"
+    >
+       <g
+         #overview="bdOverviewBrush"
+         bd-overview-brush
+         [data]="state"
+         [width]="svgWidth"
+         [height]="overviewHeight"
+         (brushed)="_onOverviewBushed"
+        ></g>
+    </svg>
+
+    <div class="flame-chart-entry-info" #myTooltip>
+    </div>
+  `
+})
+.Class({
+  constructor: [ChangeDetectorRef, function RootSvgGraphComponent (ref) {
+    log('new')
+    this._ref = ref
+    this.overviewHeight = 90
+  }],
+
+  ngOnChanges (changes) {
+    log('ngOnChanges')
+    log(Object.assign({}, changes))
+    log(Object.assign({}, this))
+  },
+
+  ngOnInit () {
+    log('ngOnInit')
+
+    Observable.fromEvent(window, 'resize')
+      .debounceTime(300)
+      .startWith(null)
+      .subscribe(() => {
+        this._resize()
+        this._ref.detectChanges()
+      })
+  },
+
+  ngAfterViewInit () {
+    log('ngAfterViewInit')
+    log(Object.assign({}, this))
+
+    this.initialize()
+  },
+
+  ngAfterViewChecked () {
+    log('ngAfterViewChecked')
+    this.render()
+  },
+
+  //
+
+  initialize () {
+    log('initialize')
+  },
+
+  render () {
+    log('render')
+  },
+
+  //
+
+  _onOverviewBushed (event) {
+    log('_onOverviewBushed', event)
+    const s = d3.event.selection || this.overview.x.range()
+    /*detailX.domain(s.map(overviewX.invert, overviewX))
+
+    timelineDetail.select('.axis--x').call(detailXAxis)
+    timelineDetail.select('.zoom').call(zoom.transform, d3.zoomIdentity
+      .scale(width / (s[1] - s[0]))
+      .translate(-s[0], 0))
+    renderBlocks()*/
+  },
+
+  _updateRootSVGSize () {
+    const svgElement = this.svgElement.nativeElement
+    this.svgWidth = svgElement.clientWidth
+    this.svgHeight = svgElement.clientHeight
+  },
+
+  _resize () {
+    this._updateRootSVGSize()
+  }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const RoootSvgGraphComponent =
 Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Native,
@@ -121,6 +309,7 @@ Component({
     <g
      #overview="bdOverviewBrush"
      bd-overview-brush
+     [data]="data"
      [width]="svgWidth"
      [height]="overviewHeight"
     ></g>
@@ -131,7 +320,7 @@ Component({
   `
 })
 .Class({
-  constructor: [ElementRef, NgZone, ChangeDetectorRef, function RootSvgGraphComponent (elementRef, ngZone, cdRef) {
+  constructor: [ElementRef, NgZone, ChangeDetectorRef, function RoootSvgGraphComponent (elementRef, ngZone, cdRef) {
     log('constructor')
     this._element = elementRef.nativeElement
     this._ngZone = ngZone

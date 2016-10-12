@@ -3,12 +3,13 @@
 /* global chrome */
 
 var panelInstance = null
+var minimalRecheckMillisecoundTime = 2000
 
 // Check to see if AngularBatscanner has loaded once per second in case React is added
 // after page load
 var loadCheckInterval = setInterval(function () {
   createPanelIfAngularBatscannerLoaded()
-}, 1000)
+}, minimalRecheckMillisecoundTime)
 
 createPanelIfAngularBatscannerLoaded()
 
@@ -18,7 +19,7 @@ chrome.devtools.network.onNavigated.addListener(function () {
   console.log('devtools detected reload !')
   loadCheckInterval = setInterval(function () {
     connectToExistingPanelIfAngularBatscannerLoaded()
-  }, 1000)
+  }, minimalRecheckMillisecoundTime)
 })
 
 //
