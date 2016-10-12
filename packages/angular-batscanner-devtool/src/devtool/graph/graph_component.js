@@ -2,10 +2,12 @@
 
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  NgZone
 } from '@angular/core'
 
 import * as d3 from 'd3'
@@ -25,6 +27,7 @@ const LIKECYCLE_HOOKS = [
 const itemHeight = 25
 const minimalMilliscondToDisplayText = 25
 
+const log = console.log.bind(null, 'RootSvgGraphComponent#')
 //
 
 export const RootSvgGraphComponent =
@@ -105,15 +108,22 @@ Component({
 
   `],
   queries: {
-    svgElement: new ViewChild('mySvg'),
+    overviewElement: new ViewChild('overview'),
+    svgElement: new ViewChild('rootSvg'),
     tooltipElement: new ViewChild('myTooltip')
   },
   template: `
   <svg
-   #mySvg
+   #rootSvg
    xmlns="http://www.w3.org/2000/svg"
    version="1.1"
   >
+    <g
+     #overview="bdOverviewBrush"
+     bd-overview-brush
+     [width]="svgWidth"
+     [height]="overviewHeight"
+    ></g>
   </svg>
 
   <div class="flame-chart-entry-info" #myTooltip>
@@ -121,14 +131,23 @@ Component({
   `
 })
 .Class({
-  constructor: [ElementRef, function RootSvgGraphComponent (elementRef) {
+  constructor: [ElementRef, NgZone, ChangeDetectorRef, function RootSvgGraphComponent (elementRef, ngZone, cdRef) {
+    log('constructor')
     this._element = elementRef.nativeElement
+    this._ngZone = ngZone
+    this._cdRef = cdRef
+
     this.data = []
     this.proporstionData = []
     this.rootTime = null
+
+    //
+
+    this.overviewHeight = 90
   }],
 
   ngOnChanges (changes) {
+    log('ngOnChanges')
     if (!(changes.state)) {
       return
     }
@@ -193,27 +212,38 @@ Component({
           )
         )
       })
-
-    this._render()
   },
 
   ngAfterViewInit () {
+    log('ngAfterViewInit')
     this._initializeGraph(
       this.svgElement.nativeElement,
-      this.tooltipElement.nativeElement
+      this.tooltipElement.nativeElement,
+      this.overviewBrush
     )
+  },
+
+  ngAfterViewChecked () {
+    this._render()
   },
 
   //
 
-  _initializeGraph (svgElement, tooltipElement) {
+  _initializeGraph (svgElement, tooltipElement, overviewGroupElement) {
+    log('_initializeGraph')
+    console.log(overviewGroupElement)
+    const self = this
+
     const margin = {top: 90, right: 0, bottom: 0, left: 0}
 
     const svg = this.svg = d3.select(svgElement)
-    d3.select(window).on('resize', resize)
 
     const svgWidth = svgElement.clientWidth
     const svgHeight = svgElement.clientHeight
+
+    this.svgWidth = svgWidth
+    this.svgHeight = svgHeight
+    d3.select(window).on('resize', resize)
 
     const width = svgWidth - margin.left - margin.right
     const height = svgHeight - margin.top - margin.bottom
@@ -261,7 +291,7 @@ Component({
     const timelineOverview = svg
       .append('g')
       .attr('class', 'timeline-overview')
-      .attr('transform', `translate(${overviewArea.left}, ${overviewArea.top})`)
+      .attr('transform', `translate(${overviewArea.left}, ${overviewArea.top - 500})`)
 
     const timelineDetail = svg
       .append('g')
@@ -317,6 +347,8 @@ Component({
 
     const renderBlocks = this._renderBlocks.bind(this)
     const render = this._render.bind(this)
+    const {overviewElement} = this
+
     //
 
     function brushed () {
@@ -329,7 +361,6 @@ Component({
       var s = d3.event.selection || overviewX.range()
       detailX.domain(s.map(overviewX.invert, overviewX))
 
-      //detailViewPort.attr('d', area)
       timelineDetail.select('.axis--x').call(detailXAxis)
       timelineDetail.select('.zoom').call(zoom.transform, d3.zoomIdentity
         .scale(width / (s[1] - s[0]))
@@ -352,8 +383,21 @@ Component({
     }
 
     function resize () {
+      log('resize in zone ? ', NgZone.isInAngularZone())
+      console.log(self)
+      self._ngZone.run(() => {
+        self.svgWidth = svgWidth
+        self.svgHeight = svgHeight
+        self._cdRef.markForCheck()
+      })
+
+
       const width = svgElement.clientWidth
       const height = svgElement.clientHeight
+
+
+
+      overviewElement.render()
 
       detailX.range([0, width])
       overviewX.range([0, width])
@@ -381,11 +425,14 @@ Component({
   },
 
   _render () {
+    log('_render')
     const data = this.data
     const proporstionData = this.proporstionData
-    if (!this.detailArea) {
+    if (!this.detailArea || !this.overviewElement) {
       return
     }
+
+    this.overviewElement.render()
 
     const {overviewArea, detailArea, overviewActivity} = this
     const {color, svg} = this
@@ -432,6 +479,7 @@ Component({
   },
 
   _renderBlocks () {
+    log('_renderBlocks')
     const {color, tooltip, detailArea: {x}} = this
     const minX = x.domain()[0]
 
