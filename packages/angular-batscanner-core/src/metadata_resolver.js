@@ -1,12 +1,13 @@
 //
 
 import {
-  __compiler_private__ as ngCompilerPrivateParts // eslint-disable-line camelcase
+  __compiler_private__ as ngCompilerPrivateParts
 } from '@angular/compiler'
 
-import {Injector, resolveForwardRef} from '@angular/core'
 import {
-  __core_private__ as ngCorePrivateParts // eslint-disable-line camelcase
+  Injector,
+  resolveForwardRef,
+  __core_private__ as ngCorePrivateParts
 } from '@angular/core'
 
 import {BatscannerEventEmitter} from './emitter/event_emitter.js'

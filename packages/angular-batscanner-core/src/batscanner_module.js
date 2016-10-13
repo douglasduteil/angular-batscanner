@@ -4,7 +4,6 @@ import {
   __compiler_private__ as ngCompilerPrivateParts // eslint-disable-line camelcase
 } from '@angular/compiler'
 
-import {BATSCANNER_ROOT_COMPONENT} from './constant.js'
 import {BatScannerCompileMetadataResolver} from './metadata_resolver.js'
 import {
   BatscannerEventEmitter,
@@ -17,7 +16,7 @@ import {
 const { CompileMetadataResolver } = ngCompilerPrivateParts
 
 //
-export { BATSCANNER_ROOT_COMPONENT }
+
 export const BATSCANNER_PROVIDERS = [
   // TODO(@douglasduteil): clarrify if must be required by default or not
   // Will throw

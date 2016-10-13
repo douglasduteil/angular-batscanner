@@ -36,6 +36,7 @@
   <!--
 
   -->
+  <script src="../../node_modules/angular-batscanner-core/lib/angular-batscanner-core.umd.js"></script>
   <script src="../../node_modules/angular-batscanner-devtool/lib/angular-batscanner-devtool.umd.js"></script>
   <!--
 
@@ -45,6 +46,7 @@
     const {
       ng,
       Rx,
+      angularBatscannerCore,
       angularBatscannerDevtool
     } = window
 
@@ -55,6 +57,13 @@
     } = ng.core
     const {BrowserModule} = ng.platformBrowser
     const {Subject} = Rx
+
+    const {
+      BATSCANNER_ROOT_COMPONENT,
+      BATSCANNER_PROVIDERS,
+      BatscannerEventEmitter,
+      BatscannerRainbowConsoleEmitter
+    } = angularBatscannerCore
     const { DevToolModule } = angularBatscannerDevtool
 
     // //////////////////////////////////////////////////////////////////////////
@@ -138,7 +147,7 @@
       `
     })
     .Class({
-      constructor: function DebbugerOnlyDemoComponentDebbugerOnlyDemoAppComponent () {
+      constructor: function DebbugerOnlyDemoAppComponent () {
       },
       ngOnInit () {
         const self = this
@@ -204,10 +213,20 @@
 
     //
 
+    const compilerOptions = {
+      providers: [
+        BATSCANNER_PROVIDERS,
+        {provide: BATSCANNER_ROOT_COMPONENT, useValue: DebbugerOnlyDemoAppComponent},
+        {provide: BatscannerEventEmitter, useClass: BatscannerRainbowConsoleEmitter}
+      ]
+    }
+
+    //
+
     document.addEventListener('DOMContentLoaded', function () {
       ng.platformBrowserDynamic
         .platformBrowserDynamic()
-        .bootstrapModule(DebbugerOnlyDemoAppModule)
+        .bootstrapModule(DebbugerOnlyDemoAppModule, compilerOptions)
     })
   }())
     /* eslint-disable no-trailing-spaces, eol-last */
