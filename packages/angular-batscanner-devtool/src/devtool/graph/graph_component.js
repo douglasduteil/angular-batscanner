@@ -34,12 +34,14 @@ const log = console.log.bind(null, '%cRootSvgGraphComponent%c#', 'color: #1abc9c
 
 export const RootSvgGraphComponent =
 Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
   exportAs: 'bdGraph',
   inputs: [
     'state'
   ],
   queries: {
+    flamechart: new ViewChild('flamechart'),
     overview: new ViewChild('overview'),
     svgElement: new ViewChild('rootSvg'),
     tooltipElement: new ViewChild('myTooltip')
@@ -66,8 +68,19 @@ Component({
          [data]="state"
          [width]="svgWidth"
          [height]="overviewHeight"
-         (brushed)="_onOverviewBushed"
+         (brushed)="_onOverviewBushed($event)"
         ></g>
+
+      <g transform='translate(0, 90)'>
+        <g
+          #flamechart="bdFlamechart"
+          bd-flamechart
+          [data]="state"
+          [width]="svgWidth"
+          [height]="flameChartHeight"
+          (zoom)="_onFlameChartZoom($event)"
+        ></g>
+      </g>
     </svg>
 
     <div class="flame-chart-entry-info" #myTooltip>
@@ -76,20 +89,11 @@ Component({
 })
 .Class({
   constructor: [ChangeDetectorRef, function RootSvgGraphComponent (ref) {
-    log('new')
     this._ref = ref
     this.overviewHeight = 90
   }],
 
-  ngOnChanges (changes) {
-    log('ngOnChanges')
-    log(Object.assign({}, changes))
-    log(Object.assign({}, this))
-  },
-
   ngOnInit () {
-    log('ngOnInit')
-
     Observable.fromEvent(window, 'resize')
       .debounceTime(300)
       .startWith(null)
@@ -99,46 +103,40 @@ Component({
       })
   },
 
-  ngAfterViewInit () {
-    log('ngAfterViewInit')
-    log(Object.assign({}, this))
-
-    this.initialize()
-  },
-
-  ngAfterViewChecked () {
-    log('ngAfterViewChecked')
-    this.render()
-  },
-
-  //
-
-  initialize () {
-    log('initialize')
-  },
-
-  render () {
-    log('render')
-  },
-
   //
 
   _onOverviewBushed (event) {
-    log('_onOverviewBushed', event)
-    const s = d3.event.selection || this.overview.x.range()
-    /*detailX.domain(s.map(overviewX.invert, overviewX))
+    const s = event.selection || this.overview.x.range()
 
-    timelineDetail.select('.axis--x').call(detailXAxis)
-    timelineDetail.select('.zoom').call(zoom.transform, d3.zoomIdentity
-      .scale(width / (s[1] - s[0]))
-      .translate(-s[0], 0))
-    renderBlocks()*/
+    this.flamechart.x.domain(s.map(this.overview.x.invert, this.overview.x))
+    d3.select(this.flamechart.axisElement.nativeElement)
+      .call(this.flamechart.xAxis)
+
+    const zoomTransform = d3.zoomIdentity
+      .scale(this.svgWidth / (s[1] - s[0]))
+      .translate(-s[0], 0)
+    d3.select(this.flamechart.zoomElement.nativeElement)
+      .call(this.flamechart.zoom.transform, zoomTransform)
+
+    this.flamechart.renderFlames()
+  },
+
+  _onFlameChartZoom (event) {
+    const t = event.transform
+
+    this.flamechart.x.domain(t.rescaleX(this.overview.x).domain())
+    d3.select(this.flamechart.axisElement.nativeElement)
+      .call(this.flamechart.xAxis)
+
+    this.flamechart.renderFlames()
   },
 
   _updateRootSVGSize () {
     const svgElement = this.svgElement.nativeElement
     this.svgWidth = svgElement.clientWidth
     this.svgHeight = svgElement.clientHeight
+
+    this.flameChartHeight = this.svgHeight - this.overviewHeight
   },
 
   _resize () {
@@ -470,11 +468,11 @@ Component({
       .extent([[0, 0], [width, overviewAreaHeight]])
       .on('brush end', brushed)
 
-    var zoom = d3.zoom()
-      .scaleExtent([1, Infinity])
-      .translateExtent([[0, 0], [width, height]])
-      .extent([[0, 0], [width, height]])
-      .on('zoom', zoomed)
+      var zoom = d3.zoom()
+        .scaleExtent([1, Infinity])
+        .translateExtent([[0, 0], [width, height]])
+        .extent([[0, 0], [width, height]])
+        .on('zoom', zoomed)
 
     //
 

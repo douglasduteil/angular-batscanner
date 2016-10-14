@@ -43,7 +43,7 @@ Component({
     'width'
   ],
   outputs: [
-    'brushed'
+    'brushEmitter: brushed'
   ],
   queries: {
     areaElement: new ViewChild('area'),
@@ -51,24 +51,26 @@ Component({
     brushElement: new ViewChild('brush')
   },
   selector: 'g[bd-overview-brush]',
+  styles: [`
+  `],
   template: `
-  <svg:g
-   #area
-   class="area">
-  ></svg:g>
-  <svg:g
-   #axis
-   class="axis axis--x">
-  ></svg:g>
-  <svg:g
-   #brush
-   class="brush">
-  ></svg:g>
+    <svg:g
+     #area
+     class="area"
+    ></svg:g>
+    <svg:g
+     #axis
+     class="axis axis--x"
+    ></svg:g>
+    <svg:g
+     #brush
+     class="brush"
+    ></svg:g>
   `
 })
 .Class({
   constructor: [function OverviewBrushComponent () {
-    this.brushed = (new EventEmitter()).debounceTime(150)
+    this.brushEmitter = new EventEmitter()// .debounceTime(50)
     this.series = []
     this.stack = d3.stack()
       .keys(LIKECYCLE_HOOKS)
@@ -101,9 +103,10 @@ Component({
   },
 
   ngAfterViewChecked () {
+    const overviewComponentRenderFrame = () => { this.render() }
     window.requestIdleCallback(() => {
       // Scheduling the next render function after the last idle "frame"
-      window.requestAnimationFrame(() => { this.render() })
+      window.requestAnimationFrame(overviewComponentRenderFrame)
     })
   },
   //
@@ -153,7 +156,7 @@ Component({
       .attr('d', area)
       .style('fill', (d, i) => d3.rgb(color(i)).brighter(1.5))
 */
-    d3.select(this.areaElement.nativeElement).call((context) => {
+    const areaChart = (context) => {
       const selection = context.selection ? context.selection() : context
       const path = selection.selectAll('path').data(this.series)
       const pathExit = path.exit()
@@ -163,7 +166,8 @@ Component({
         .attr('d', this.area)
         .style('fill', (d, i) => d3.rgb(this.color(i)).brighter(1.5))
       pathExit.remove()
-    })
+    }
+    d3.select(this.areaElement.nativeElement).call(areaChart)
     d3.select(this.axisElement.nativeElement).call(this.xAxis)
     d3.select(this.brushElement.nativeElement).call(this.brush)
   },
@@ -171,11 +175,11 @@ Component({
   //
 
   _brushed () {
-    log('_brushed')
+    if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') {
+      return // ignore brush-by-zoom
+    }
 
-    if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return // ignore brush-by-zoom
-
-    this.brushed.next(d3.event)
+    this.brushEmitter.next(d3.event)
   }
 })
 
