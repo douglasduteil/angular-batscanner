@@ -13,7 +13,7 @@ import {Subject} from 'rxjs/Subject'
 export const DevtoolComponent =
 Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.Native,
+  encapsulation: ViewEncapsulation.Emulated,
   inputs: ['state'],
   selector: 'batscanner-debugger',
   styles: [`
@@ -26,6 +26,17 @@ Component({
   bd-graph {
     flex: 1
   }
+
+  :host /deep/ .axis {
+    text-anchor: end
+  }
+  :host /deep/ .axis path,
+  :host /deep/ .axis line {
+    fill: none;
+    stroke: #dadada;
+    shape-rendering: crispEdges;
+  }
+
   `],
   template: `
   <bd-navbar>

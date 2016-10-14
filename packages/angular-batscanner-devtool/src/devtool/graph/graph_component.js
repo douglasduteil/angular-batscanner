@@ -34,6 +34,7 @@ const log = console.log.bind(null, '%cRootSvgGraphComponent%c#', 'color: #1abc9c
 
 export const RootSvgGraphComponent =
 Component({
+  encapsulation: ViewEncapsulation.Emulated,
   exportAs: 'bdGraph',
   inputs: [
     'state'

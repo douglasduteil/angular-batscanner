@@ -32,7 +32,7 @@ const log = console.log.bind(null, '%cOverviewBrushComponent%c#', 'color: #2980b
 export const OverviewBrushComponent =
 Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.Emulated,
   exportAs: 'bdOverviewBrush',
   host: {
   },
@@ -68,8 +68,6 @@ Component({
 })
 .Class({
   constructor: [function OverviewBrushComponent () {
-    log('new')
-
     this.brushed = (new EventEmitter()).debounceTime(150)
     this.series = []
     this.stack = d3.stack()
@@ -81,9 +79,6 @@ Component({
   }],
 
   ngOnChanges (changes) {
-    log('ngOnChanges')
-    log(Object.assign({}, this))
-
     if (changes.width && this.x) {
       this.x.range([0, this.width])
     }
@@ -144,8 +139,6 @@ Component({
   },
 
   render () {
-    log('render')
-
     const minmaxdomain = d3.extent([this.startTime, this.endTime])
     this.x.domain(minmaxdomain)
     this.y.domain([10, 0])
