@@ -87,9 +87,10 @@ function aggregateUntill (source, componentToken) {
       .subscribe((e) => observer.next(e))
 
     // Listen to the source for AfterViewChecked AFTER buffering stuff
+    const onCloseNotification = () => everyRootComponentAfterViewChecked.next()
     const closingNotifier$ = source
-      .filter((e) => hasCheckedTheRootComponent(e))
-      .subscribe(() => everyRootComponentAfterViewChecked.next())
+      .filter(hasCheckedTheRootComponent.bind(null))
+      .subscribe(onCloseNotification)
 
     return function () {
       observer.complete()
