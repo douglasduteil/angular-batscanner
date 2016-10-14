@@ -93,31 +93,27 @@ Component({
       this.endTime = (this.data[this.data.length - 1] || {}).timestamp
 
       const proporstionData = []
-      calculateEventProportion(this.data, this.startTime, proporstionData)
-
-      this.series = this.series.concat(this.stack(proporstionData))
+      const processAndAssignNewSerie = () => {
+        calculateEventProportion(this.data, this.startTime, proporstionData)
+        this.series = this.series.concat(this.stack(proporstionData))
+      }
+      window.requestIdleCallback(processAndAssignNewSerie)
     }
   },
 
-  ngOnInit () {
-    log('ngOnInit')
-  },
-
   ngAfterViewInit () {
-    log('ngAfterViewInit')
-
     this.initialize()
   },
 
   ngAfterViewChecked () {
-    log('ngAfterViewChecked')
-    this.render()
+    window.requestIdleCallback(() => {
+      // Scheduling the next render function after the last idle "frame"
+      window.requestAnimationFrame(() => { this.render() })
+    })
   },
   //
 
   initialize () {
-    log('initialize')
-
     this.x = d3.scaleLinear()
       .domain([0, 1000])
       .range([0, this.width])
