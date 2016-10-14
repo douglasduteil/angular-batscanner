@@ -50,9 +50,14 @@ InjectedClass({
 
     //
 
-    source.subscribe((aggregatedEvents) => {
-      window.requestIdleCallback(() => this.groupLog(aggregatedEvents))
-    })
+    const onNewAggregaterEvents = (aggregatedEvents) => {
+      const batscannerRainbowConsoleRender = () => this.groupLog(aggregatedEvents)
+      window.requestIdleCallback(() => {
+        window.requestIdleCallback(batscannerRainbowConsoleRender)
+      })
+    }
+
+    source.subscribe(onNewAggregaterEvents)
   }],
 
   next (event) {
