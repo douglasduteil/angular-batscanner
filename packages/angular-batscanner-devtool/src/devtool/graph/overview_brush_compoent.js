@@ -3,7 +3,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
   EventEmitter,
   ViewChild,
   ViewEncapsulation
@@ -24,8 +23,7 @@ const LIKECYCLE_HOOKS = [
   'AfterViewChecked',
   'ngOnDestroy'
 ]
-const itemHeight = 25
-const minimalMilliscondToDisplayText = 25
+
 const log = console.log.bind(null, '%cOverviewBrushComponent%c#', 'color: #2980b9', 'color: #333')
 
 //
@@ -210,163 +208,3 @@ function calculateEventProportion (data, relativeTime, proportionsDataOutput) {
       )
     })
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export const OOverviewBrushComponent =
-Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  exportAs: 'bdOverviewBrush',
-  host: {
-  },
-  inputs: [
-    'transform',
-    'height',
-    'width'
-  ],
-  queries: {
-    axisElement: new ViewChild('axis')
-  },
-  selector: 'g[bd-overview-brush]',
-  template: `
-  <svg:g
-   #axis
-   class="axis axis--x">
-   width : {{ width }}
-  ></svg:g>
-  `
-})
-.Class({
-  constructor: [ElementRef, function OOverviewBrushComponent (elementRef) {
-    log('new')
-    this._element = elementRef.nativeElement
-
-    this._isInitialized = false
-
-    this.group = d3.select(this._element.nativeElement)
-    this.transform = `translate(0, 0)`
-  }],
-
-  ngOnChanges (changes) {
-    log('ngOnChanges')
-    console.log('ngChanges', changes, this)
-  },
-
-  ngAfterViewChecked () {
-    log('ngAfterViewChecked')
-    if (!this._isInitialized) {
-      this.initialize()
-      return
-    }
-    this.render()
-  },
-
-  //
-
-  _initializedView () {
-    return [
-      this._hasVitalInfo(),
-      //
-      this.axisElement,
-      this.x,
-      this.xAxis
-    ].every(Boolean)
-  },
-
-  _hasVitalInfo () {
-    return [
-      this.width,
-      this.height
-    ].every(Boolean)
-  },
-
-  //
-
-  initialize () {
-    console.log('initialize')
-    if (!this._hasVitalInfo()) {
-      return
-    }
-
-    this.x = d3.scaleLinear()
-      .domain([0, 1000])
-      .range([0, this.width])
-
-    this.xAxis = d3.axisBottom(this.x)
-      .tickFormat((p) => d3.format('d')(p) + ' ms')
-      .tickSizeInner(this.height)
-      .tickPadding(5 - this.height)
-
-    this._isInitialized = true
-    console.log('initialized')
-  },
-
-  render () {
-    console.log('render')
-    if (!this._initializedView()) {
-      return
-    }
-
-    console.log('rendered')
-  }
-})
