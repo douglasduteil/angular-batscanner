@@ -9,6 +9,7 @@ import {
   ViewEncapsulation
 } from '@angular/core'
 
+import {LifecycleHooksColors} from './lifecycle_hooks_colors.js'
 import * as d3 from 'd3'
 
 //
@@ -94,7 +95,7 @@ Component({
     this.zoomEmitter = new EventEmitter() // .debounceTime(150)
     this.series = []
 
-    this.color = d3.scaleOrdinal(d3.schemeCategory10)
+    this.color = (type) => LifecycleHooksColors[type]
   }],
 
   ngAfterViewInit () {
@@ -189,7 +190,7 @@ Component({
       rectEnter.merge(rect)
         .attr('height', (d) => itemHeight)
         .attr('width', (d) => this.x((d.duration || 1)))
-        .attr('fill', (d, i) => d3.rgb(this.color(d.type)).brighter(1.5))
+        .attr('fill', (d, i) => this.color(d.type))
 
       //
 

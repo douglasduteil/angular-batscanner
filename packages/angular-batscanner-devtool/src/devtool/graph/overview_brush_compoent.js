@@ -9,6 +9,7 @@ import {
   ViewEncapsulation
 } from '@angular/core'
 
+import {LifecycleHooksColors} from './lifecycle_hooks_colors.js'
 import * as d3 from 'd3'
 
 //
@@ -77,7 +78,7 @@ Component({
       .order(d3.stackOrderNone)
       .offset(d3.stackOffsetNone)
 
-    this.color = d3.scaleOrdinal(d3.schemeCategory10)
+    this.color = (type) => d3.rgb(LifecycleHooksColors[type])
   }],
 
   ngOnChanges (changes) {
@@ -146,16 +147,6 @@ Component({
     this.x.domain(minmaxdomain)
     this.y.domain([10, 0])
 
-/*
-    var paths = overviewActivity.selectAll('path')
-      .data(series)
-
-    paths.exit().remove()
-    paths.enter().append('path')
-      .merge(paths)
-      .attr('d', area)
-      .style('fill', (d, i) => d3.rgb(color(i)).brighter(1.5))
-*/
     const areaChart = (context) => {
       const selection = context.selection ? context.selection() : context
       const path = selection.selectAll('path').data(this.series)
@@ -164,7 +155,7 @@ Component({
 
       path.merge(pathEnter)
         .attr('d', this.area)
-        .style('fill', (d, i) => d3.rgb(this.color(i)).brighter(1.5))
+        .style('fill', (d) => this.color(d.key))
       pathExit.remove()
     }
     d3.select(this.areaElement.nativeElement).call(areaChart)

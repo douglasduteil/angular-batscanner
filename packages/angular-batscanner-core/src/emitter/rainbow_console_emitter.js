@@ -19,17 +19,17 @@ const LifecycleHooks = new Proxy(LifecycleHooksEnum, {
   }
 })
 
-console.log(LifecycleHooks.OnInit)
 //
 
 var HOOKS_COLORS = {
+  [LifecycleHooks.OnChanges]: 'color: red',
   [LifecycleHooks.OnInit]: 'color: lime',
+  [LifecycleHooks.DoCheck]: 'color: indigo',
   [LifecycleHooks.AfterContentInit]: 'color: orange',
   [LifecycleHooks.AfterContentChecked]: 'color: chocolate',
   [LifecycleHooks.AfterViewInit]: 'color: green',
   [LifecycleHooks.AfterViewChecked]: 'color: olive',
-  [LifecycleHooks.DoCheck]: 'color: indigo',
-  [LifecycleHooks.OnChanges]: 'color: red'
+  [LifecycleHooks.OnDestroy]: 'color: magenta'
 }
 
 export const BatscannerRainbowConsoleEmitter =
