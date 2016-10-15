@@ -115,20 +115,30 @@ Component({
     const zoomTransform = d3.zoomIdentity
       .scale(this.svgWidth / (s[1] - s[0]))
       .translate(-s[0], 0)
+
     d3.select(this.flamechart.zoomElement.nativeElement)
       .call(this.flamechart.zoom.transform, zoomTransform)
 
-    this.flamechart.renderFlames()
+    d3.select(this.flamechart.flameGroupElement.nativeElement)
+      .call(this.flamechart.flames.bind(this.flamechart))
   },
 
   _onFlameChartZoom (event) {
     const t = event.transform
 
     this.flamechart.x.domain(t.rescaleX(this.overview.x).domain())
+
     d3.select(this.flamechart.axisElement.nativeElement)
       .call(this.flamechart.xAxis)
 
-    this.flamechart.renderFlames()
+    d3.select(this.overview.brushElement.nativeElement)
+      .call(
+        this.overview.brush.move,
+        this.flamechart.x.range().map(t.invertX, t)
+      )
+
+    d3.select(this.flamechart.flameGroupElement.nativeElement)
+      .call(this.flamechart.flames.bind(this.flamechart))
   },
 
   _updateRootSVGSize () {

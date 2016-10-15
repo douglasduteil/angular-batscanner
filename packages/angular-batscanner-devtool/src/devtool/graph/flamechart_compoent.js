@@ -87,6 +87,7 @@ Component({
     <svg:g
      #flameGroup
      class="flame-group"
+     transform='translate(0, 20)'
     ></svg:g>
   `
 })
@@ -164,64 +165,64 @@ Component({
       .on('zoom', this._zoomed.bind(this))
   },
 
+  flames (context) {
+    const selection = context.selection ? context.selection() : context
+    const minX = this.x.domain()[0]
+    const sizeX = (posX) => this.x(minX + posX)
+
+    const flame = selection.selectAll('.flame')
+      .data(this.series)
+    const flameExit = flame.exit()
+    const flameEnter = flame.enter()
+      .append('g')
+      .attr('class', 'flame')
+
+    flameEnter.merge(flame)
+      .attr('transform', (d, i) =>
+        `translate(${this.x(d.timestamp)}, ${d.depth * itemHeight})`
+      )
+
+    flameExit.remove()
+
+    //
+
+    const rect = flame.select('rect')
+    const rectEnter = flameEnter.append('rect')
+
+    rectEnter.merge(rect)
+      .attr('height', (d) => itemHeight)
+      .attr('width', (d) => sizeX((d.duration || 1)))
+      .attr('fill', (d, i) => this.color(d.type))
+
+    //
+
+    const foreignObject = flame.select('foreignObject')
+    const foreignObjectEnter = flameEnter
+      .append('foreignObject')
+
+    foreignObjectEnter.merge(foreignObject)
+      .attr('height', (d) => itemHeight)
+      .attr('width', (d) => sizeX((d.duration || 1)))
+
+    //
+
+    const label = foreignObject.select('.label')
+    const lableEnter = foreignObjectEnter
+      .append('xhtml:div')
+      .attr('class', 'label')
+
+    lableEnter.merge(label)
+      .style('display', (d) => (
+        sizeX((d.duration || 1)) < minimalMilliscondToDisplayText)
+        ? 'none' : 'block'
+      )
+      .attr('fill', '#000')
+      .text((d) => `${d.type} @ ${d.targetName}`)
+  },
+
   render () {
-    const flameChart = (context) => {
-      const selection = context.selection ? context.selection() : context
-      const minX = this.x.domain()[0]
-      const x = (posX) => this.x(minX + posX)
-
-      const flame = selection.selectAll('.flame')
-        .data(this.series, (d, i) => i)
-      const flameExit = flame.exit()
-      const flameEnter = flame.enter()
-        .append('g')
-        .attr('class', 'flame')
-
-      flameEnter.merge(flame)
-        .attr('transform', (d, i) =>
-          `translate(${x(d.timestamp)}, ${d.depth * itemHeight})`
-        )
-
-      flameExit.remove()
-
-      //
-
-      const rect = flame.select('rect')
-      const rectEnter = flameEnter.append('rect')
-
-      rectEnter.merge(rect)
-        .attr('height', (d) => itemHeight)
-        .attr('width', (d) => x((d.duration || 1)))
-        .attr('fill', (d, i) => this.color(d.type))
-
-      //
-
-      const foreignObject = flame.select('foreignObject')
-      const foreignObjectEnter = flameEnter
-        .append('foreignObject')
-
-      foreignObjectEnter.merge(foreignObject)
-        .attr('height', (d) => itemHeight)
-        .attr('width', (d) => x((d.duration || 1)))
-
-      //
-
-      const label = foreignObject.select('.label')
-      const lableEnter = foreignObjectEnter
-        .append('xhtml:div')
-        .attr('class', 'label')
-
-      lableEnter.merge(label)
-        .style('display', (d) => (
-          x((d.duration || 1)) < minimalMilliscondToDisplayText)
-          ? 'none' : 'block'
-        )
-        .attr('fill', '#000')
-        .text((d) => `${d.type} @ ${d.targetName}`)
-    }
-
     d3.select(this.flameGroupElement.nativeElement)
-      .call(flameChart)
+      .call(this.flames.bind(this))
 
     d3.select(this.zoomElement.nativeElement)
       .attr('width', this.width)
@@ -232,10 +233,6 @@ Component({
       .call(this.xAxis)
       .selectAll('text')
         .attr('x', '-5')
-  },
-
-  renderFlames () {
-
   },
 
   //
