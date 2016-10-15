@@ -33,7 +33,7 @@ Component({
   :host /deep/ .axis path,
   :host /deep/ .axis line {
     fill: none;
-    stroke: #dadada;
+    stroke: rgba(90, 90, 90, .09);
     shape-rendering: crispEdges;
   }
 

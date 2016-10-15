@@ -111,6 +111,7 @@ Component({
       window.requestAnimationFrame(overviewComponentRenderFrame)
     })
   },
+
   //
 
   initialize () {
