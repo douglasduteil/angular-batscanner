@@ -21,8 +21,12 @@ const LIKECYCLE_HOOKS = [
   'AfterContentChecked',
   'AfterViewInit',
   'AfterViewChecked',
-  'ngOnDestroy'
+  'OnDestroy'
 ]
+
+const virginProportionEntry = LIKECYCLE_HOOKS
+  .reduce((memo, val) => Object.assign(memo, {[val]: 0}), {})
+
 
 const log = console.log.bind(null, '%cOverviewBrushComponent%c#', 'color: #2980b9', 'color: #333')
 
@@ -88,9 +92,8 @@ Component({
       this.startTime = this.startTime || (this.data[0] || {}).timestamp
       this.endTime = (this.data[this.data.length - 1] || {}).timestamp
 
-      const proporstionData = []
       const processAndAssignNewSerie = () => {
-        calculateEventProportion(this.data, this.startTime, proporstionData)
+        const proporstionData = calculateEventProportion(this.data, this.startTime, proporstionData)
         this.series = this.series.concat(this.stack(proporstionData))
       }
       window.requestIdleCallback(processAndAssignNewSerie)
@@ -175,36 +178,75 @@ Component({
 //
 
 function calculateEventProportion (data, relativeTime, proportionsDataOutput) {
-  window.Rx.Observable.from(data)
+  const {eventStacks} = data.reduce(function (memo, event, index) {
+    if (Number.isNaN(Number(memo.depthMap[event.id]))) {
+      memo.depthMap[event.id] = memo.depthMap.maxDepth
+      memo.depthMap.maxDepth += 1
+    }
+
+    const lastEventStack = (memo.eventStacks[index - 1] || {}).stack || []
+    const eventStack = [].concat(lastEventStack)
+    const lastEvent = eventStack[eventStack.length - 1] || {}
+    const lastDepth = memo.depthMap[lastEvent.id] || -1
+    const currentDepth = memo.depthMap[event.id] || 1
+
+    if (currentDepth === lastDepth) {
+      eventStack.pop()
+    }
+
+    if (currentDepth >= lastDepth) {
+      eventStack.push(Object.assign({}, event, {
+        depth: currentDepth
+      }))
+    } else {
+      eventStack.pop()
+    }
+
+    memo.eventStacks.push({
+      stack: eventStack,
+      timestamp: event.timestamp + (event.duration / 2)
+    })
+
+    return memo
+  }, {
+    depthMap: {maxDepth: 1},
+    eventStacks: []
+  })
+
+  const eventProportion = eventStacks.map(function (eventStack) {
+    const proportions = calculateEventProportionIn(eventStack.stack)
+    return Object.assign(
+      {timestamp: eventStack.timestamp},
+      proportions
+    )
+  })
+
+  const startTimestamp = (data[0] || {}).timestamp
+  const endTimestamp = (data[data.length - 1] || {}).timestamp
+
+  eventProportion.unshift(Object.assign({}, virginProportionEntry, {
+    timestamp: startTimestamp
+  }))
+
+  eventProportion.push(Object.assign({}, virginProportionEntry, {
+    timestamp: endTimestamp + (data[data.length - 1].duration || 0)
+  }))
+
+  return eventProportion
+}
+
+function calculateEventProportionIn (collection) {
+  let result
+  window.Rx.Observable.from(collection)
     .groupBy((x) => x.type)
     .flatMap((obs) => obs.count().map((v) => ({ [obs.key]: v })))
     .reduce(
       (memo, group) => Object.assign(memo, group),
-      LIKECYCLE_HOOKS.reduce((memo, val) => Object.assign(memo, {[val]: 0}), {})
+      Object.assign({}, virginProportionEntry)
     )
     .subscribe((proportions) => {
-      if (!data[0]) {
-        return
-      }
-      const startTimestamp = data[0].timestamp - relativeTime
-      const endTimestamp = data[data.length - 1].timestamp - relativeTime
-
-      proportionsDataOutput.push(
-        LIKECYCLE_HOOKS.reduce(
-          (memo, val) => Object.assign(memo, {[val]: 0}),
-          { timestamp: Math.max(0, startTimestamp) }
-        )
-      )
-
-      proportionsDataOutput.push(Object.assign({}, proportions, {
-        timestamp: startTimestamp + ((endTimestamp - startTimestamp) / 2)
-      }))
-
-      proportionsDataOutput.push(
-        LIKECYCLE_HOOKS.reduce(
-          (memo, val) => Object.assign(memo, {[val]: 0}),
-          { timestamp: endTimestamp }
-        )
-      )
+      result = proportions
     })
+
+  return result
 }

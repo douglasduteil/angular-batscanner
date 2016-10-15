@@ -167,6 +167,8 @@ Component({
   render () {
     const flameChart = (context) => {
       const selection = context.selection ? context.selection() : context
+      const minX = this.x.domain()[0]
+      const x = (posX) => this.x(minX + posX)
 
       const flame = selection.selectAll('.flame')
         .data(this.series, (d, i) => i)
@@ -177,7 +179,7 @@ Component({
 
       flameEnter.merge(flame)
         .attr('transform', (d, i) =>
-          `translate(${this.x(d.timestamp)}, ${d.depth * itemHeight})`
+          `translate(${x(d.timestamp)}, ${d.depth * itemHeight})`
         )
 
       flameExit.remove()
@@ -189,7 +191,7 @@ Component({
 
       rectEnter.merge(rect)
         .attr('height', (d) => itemHeight)
-        .attr('width', (d) => this.x((d.duration || 1)))
+        .attr('width', (d) => x((d.duration || 1)))
         .attr('fill', (d, i) => this.color(d.type))
 
       //
@@ -200,7 +202,7 @@ Component({
 
       foreignObjectEnter.merge(foreignObject)
         .attr('height', (d) => itemHeight)
-        .attr('width', (d) => this.x((d.duration || 1)))
+        .attr('width', (d) => x((d.duration || 1)))
 
       //
 
@@ -211,7 +213,7 @@ Component({
 
       lableEnter.merge(label)
         .style('display', (d) => (
-          this.x((d.duration || 1)) < minimalMilliscondToDisplayText)
+          x((d.duration || 1)) < minimalMilliscondToDisplayText)
           ? 'none' : 'block'
         )
         .attr('fill', '#000')
