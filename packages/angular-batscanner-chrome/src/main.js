@@ -3,6 +3,7 @@
 /* global chrome */
 
 var panelInstance = null
+var panelCreated = null
 var minimalRecheckMillisecoundTime = 2000
 
 // Check to see if AngularBatscanner has loaded once per second in case React is added
@@ -40,7 +41,8 @@ function connectToExistingPanelIfAngularBatscannerLoaded () {
 }
 
 function createPanelIfAngularBatscannerLoaded () {
-  if (panelInstance) {
+  if (panelInstance || panelCreated) {
+    clearInterval(loadCheckInterval)
     return
   }
 
@@ -67,6 +69,7 @@ function connectToExistingPanel (panel) {
 
 function createPanel () {
   chrome.devtools.panels.create('Angular BatScanner', '', 'lib/panel.html', function (panel) {
+    panelCreated = true
     panel.onShown.addListener(function (window) {
       panelInstance = window.angularBatscannerChrome
     })
