@@ -18,6 +18,12 @@
   <script src="https://unpkg.com/requestidlecallback@0.2.0/index.js"></script>
 
   -->
+  <style>
+    html{
+      color: rgb(48, 57, 66);
+      font-family: Ubuntu, Arial, sans-serif;
+    }
+  </style>
 </head>
 <body>
   <!--
@@ -78,56 +84,6 @@
 
     // //////////////////////////////////////////////////////////////////////////
 
-    const db = [
-      [
-        {id: 0, targetName: 'RootComponent', type: 'OnInit'},
-        {id: 0, targetName: 'RootComponent', type: 'DoCheck'},
-        {id: 0, targetName: 'RootComponent', type: 'AfterContentInit'},
-        {id: 0, targetName: 'RootComponent', type: 'AfterContentChecked'},
-        {id: 1, targetName: 'ViewComponent', type: 'OnInit'},
-        {id: 1, targetName: 'ViewComponent', type: 'DoCheck'},
-        {id: 1, targetName: 'ViewComponent', type: 'AfterContentInit'},
-        {id: 1, targetName: 'ViewComponent', type: 'AfterContentChecked'},
-        {id: 2, targetName: 'DumbComponent', type: 'OnChanges'},
-        {id: 2, targetName: 'DumbComponent', type: 'OnInit'},
-        {id: 2, targetName: 'DumbComponent', type: 'DoCheck'},
-        {id: 2, targetName: 'DumbComponent', type: 'AfterContentInit'},
-        {id: 2, targetName: 'DumbComponent', type: 'AfterContentChecked'},
-        {id: 2, targetName: 'DumbComponent', type: 'AfterViewInit'},
-        {id: 2, targetName: 'DumbComponent', type: 'AfterViewChecked'},
-        {id: 1, targetName: 'ViewComponent', type: 'AfterViewInit'},
-        {id: 1, targetName: 'ViewComponent', type: 'AfterViewChecked'},
-        {id: 0, targetName: 'RootComponent', type: 'AfterViewInit'},
-        {id: 0, targetName: 'RootComponent', type: 'AfterViewChecked'}
-      ],
-      [
-        {id: 0, targetName: 'RootComponent', type: 'DoCheck'},
-        {id: 0, targetName: 'RootComponent', type: 'AfterContentChecked'},
-        {id: 151, targetName: 'ViewComponent', type: 'DoCheck'},
-        {id: 151, targetName: 'ViewComponent', type: 'AfterContentChecked'},
-        {id: 2, targetName: 'DumbComponent', type: 'OnChanges'},
-        {id: 2, targetName: 'DumbComponent', type: 'DoCheck'},
-        {id: 2, targetName: 'DumbComponent', type: 'AfterContentChecked'},
-        {id: 2, targetName: 'DumbComponent', type: 'AfterViewChecked'},
-        {id: 151, targetName: 'ViewComponent', type: 'AfterViewChecked'},
-        {id: 0, targetName: 'RootComponent', type: 'AfterViewChecked'}
-      ],
-      [
-        {id: 0, targetName: 'RootComponent', type: 'DoCheck'},
-        {id: 0, targetName: 'RootComponent', type: 'AfterContentChecked'},
-        {id: 1, targetName: 'RouterOutlet', type: 'DoCheck'},
-        {id: 2, targetName: 'MyRouteComponent', type: 'DoCheck'},
-        {id: 2, targetName: 'MyRouteComponent', type: 'AfterContentChecked'},
-        {id: 3, targetName: 'DumbComponent', type: 'OnChanges'},
-        {id: 3, targetName: 'DumbComponent', type: 'DoCheck'},
-        {id: 3, targetName: 'DumbComponent', type: 'AfterContentChecked'},
-        {id: 3, targetName: 'DumbComponent', type: 'AfterViewChecked'},
-        {id: 2, targetName: 'MyRouteComponent', type: 'AfterViewChecked'},
-        {id: 1, targetName: 'RouterOutlet', type: 'AfterContentChecked'},
-        {id: 1, targetName: 'RouterOutlet', type: 'AfterViewChecked'},
-        {id: 0, targetName: 'RootComponent', type: 'AfterViewChecked'}
-      ]
-    ]
 
     // //////////////////////////////////////////////////////////////////////////
 
@@ -136,71 +92,101 @@
       encapsulation: ViewEncapsulation.Native,
       selector: 'debbuger-only-demo-app',
       styles: [`
-      :host {
-        display: flex;
-        overflow: hidden;
-        flex-direction: column !important;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 0;
-      }
+        :host {
+          display: flex;
+          overflow: hidden;
+          flex-direction: column;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 0;
+        }
 
-      batscanner-debugger {
-        flex: 1;
-      }
+        batscanner-debugger {
+          flex: 1;
+        }
+
+        nav {
+          display: flex;
+          min-height: 25px;
+          border-bottom: 1px solid #dadada;
+          padding: 5px 1em 2px;
+        }
       `],
       template: `
-      <batscanner-debugger [state]="debuggerState$ | async"></batscanner-debugger>
+        <nav>
+          Trigger :
+          <button
+           *ngFor="let event of events; trackBy: trackByFn"
+           (click)="trigger(event.data)"
+          >
+            {{ event.name }}
+          </button>
+        </nav>
+        <batscanner-debugger
+         [state]="debuggerState$ | async"
+        >
+        </batscanner-debugger>
       `
     })
     .Class({
-      constructor: function DebbugerOnlyDemoAppComponent () {
-      },
+      constructor: function DebbugerOnlyDemoAppComponent () {},
+
       ngOnInit () {
-        const self = this
-        this.debuggerState$ = new Subject()
-        this.done = false
+        let duration = 1000// + (Math.random() * 5000)
+        let state
+        let startTime = 0
 
-        const timestamp = window.performance.now()
-        let latestTimestamp = timestamp
-        setTimeout(() => { generateEvents(db) }, 1000)
-        setTimeout(() => { self.done = true }, 5000)
-        //
+        this.debuggerState$ = (new Subject())
+          .do(() => {
+            startTime += 1000
+            state = {idStack: [], maxDepth: 0}
+          })
+          .map((events) => events.reduce((memo, event, index) => {
+            if (!state[event.id]) {
+              state[event.id] = { depth: state.maxDepth }
+              state.maxDepth += 1
+            }
 
-        function generateEvents (events) {
-          if (self.done) {
-            return
-          }
+            const latestSameIdEventIndex = state[event.id].lastEventIndex
+            state[event.id].lastEventIndex = index
+            if (!Number.isNaN(Number(latestSameIdEventIndex))) {
+              const lastEvent = memo[latestSameIdEventIndex]
+              lastEvent.duration = startTime - lastEvent.timestamp
+              state[event.id].timestamp = startTime
+            }
 
-          const serieIndex = Math.floor(Math.random() * events.length)
-          const abstractSerie = db[serieIndex]
-          const duration = 1000 + (Math.random() * 5000)
+            state[event.id].timestamp = state[event.id].timestamp || startTime
 
-          const generatedSerie = abstractSerie.map(function (event, i) {
-            // console.log('latestTimestamp', Math.floor(latestTimestamp))
-            const eventTimestamp = latestTimestamp
-            latestTimestamp += duration
-            return Object.assign({}, event, {
+            const eventTimestamp = state[event.id].timestamp
+            state[event.id].timestamp += duration
+            startTime = state[event.id].timestamp
+
+            return memo.concat([Object.assign({}, event, {
               duration: duration,
-              end: latestTimestamp,
+              end: state[event.id].timestamp,
               start: eventTimestamp,
               timestamp: eventTimestamp
-            })
-          })
-          // console.log('generatedSerie', generatedSerie)
-          self.debuggerState$.next(generatedSerie)
+            })])
+          }, []))
 
-          const generateEventsFn = generateEvents.bind(null, events)
-          setTimeout(generateEventsFn, 1000)
-        }
+        this.events = window.batscannerEventDb
+
+        setTimeout(() => this.trigger(this.events[0].data), 2000)
+        setTimeout(() => this.trigger(this.events[0].data), 4000)
       },
 
       ngOnDestroy () {
         this.done = true
         this.debuggerState$.dispose()
+      },
+
+      //
+
+      trigger (data) {
+        this.debuggerState$.next(data)
       }
     })
 
@@ -251,6 +237,71 @@
         .bootstrapModule(DebbugerOnlyDemoAppModule, compilerOptions)
     })
   }())
+    /* eslint-disable no-trailing-spaces, eol-last */
+  </script>
+  <!--
+
+  -->
+  <script>
+    window.batscannerEventDb = [
+      {
+        name: 'First run',
+        data: [
+          {id: 0, targetName: 'RootComponent', type: 'OnInit'},
+          {id: 0, targetName: 'RootComponent', type: 'DoCheck'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterContentInit'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterContentChecked'},
+          {id: 1, targetName: 'ViewComponent', type: 'OnInit'},
+          {id: 1, targetName: 'ViewComponent', type: 'DoCheck'},
+          {id: 1, targetName: 'ViewComponent', type: 'AfterContentInit'},
+          {id: 1, targetName: 'ViewComponent', type: 'AfterContentChecked'},
+          {id: 2, targetName: 'DumbComponent', type: 'OnChanges'},
+          {id: 2, targetName: 'DumbComponent', type: 'OnInit'},
+          {id: 2, targetName: 'DumbComponent', type: 'DoCheck'},
+          {id: 2, targetName: 'DumbComponent', type: 'AfterContentInit'},
+          {id: 2, targetName: 'DumbComponent', type: 'AfterContentChecked'},
+          {id: 2, targetName: 'DumbComponent', type: 'AfterViewInit'},
+          {id: 2, targetName: 'DumbComponent', type: 'AfterViewChecked'},
+          {id: 1, targetName: 'ViewComponent', type: 'AfterViewInit'},
+          {id: 1, targetName: 'ViewComponent', type: 'AfterViewChecked'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterViewInit'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterViewChecked'}
+        ]
+      },
+      {
+        name: 'Usual Run',
+        data: [
+          {id: 0, targetName: 'RootComponent', type: 'DoCheck'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterContentChecked'},
+          {id: 151, targetName: 'ViewComponent', type: 'DoCheck'},
+          {id: 151, targetName: 'ViewComponent', type: 'AfterContentChecked'},
+          {id: 2, targetName: 'DumbComponent', type: 'OnChanges'},
+          {id: 2, targetName: 'DumbComponent', type: 'DoCheck'},
+          {id: 2, targetName: 'DumbComponent', type: 'AfterContentChecked'},
+          {id: 2, targetName: 'DumbComponent', type: 'AfterViewChecked'},
+          {id: 151, targetName: 'ViewComponent', type: 'AfterViewChecked'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterViewChecked'}
+        ]
+      },
+      {
+        name: 'RouterOutlet Run',
+        data: [
+          {id: 0, targetName: 'RootComponent', type: 'DoCheck'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterContentChecked'},
+          {id: 1, targetName: 'RouterOutlet', type: 'DoCheck'},
+          {id: 2, targetName: 'MyRouteComponent', type: 'DoCheck'},
+          {id: 2, targetName: 'MyRouteComponent', type: 'AfterContentChecked'},
+          {id: 3, targetName: 'DumbComponent', type: 'OnChanges'},
+          {id: 3, targetName: 'DumbComponent', type: 'DoCheck'},
+          {id: 3, targetName: 'DumbComponent', type: 'AfterContentChecked'},
+          {id: 3, targetName: 'DumbComponent', type: 'AfterViewChecked'},
+          {id: 2, targetName: 'MyRouteComponent', type: 'AfterViewChecked'},
+          {id: 1, targetName: 'RouterOutlet', type: 'AfterContentChecked'},
+          {id: 1, targetName: 'RouterOutlet', type: 'AfterViewChecked'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterViewChecked'}
+        ]
+      }
+    ]
     /* eslint-disable no-trailing-spaces, eol-last */
   </script>
   <!--
