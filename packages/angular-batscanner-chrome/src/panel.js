@@ -46,19 +46,26 @@ const BatscannerPanelComponent = Component({
     this._ngZone = ngZone
 
     this.state$ = new Subject()
+    const isOfTypeData = (state) => state.type === 'data'
+    const returnsStateDataEvents = (state) => state.data.events
     this.debuggerState$ = this.state$
-      .filter((state) => state.type === 'data')
-      .map((state) => state.data.events)
+      .filter(isOfTypeData)
+      .map(returnsStateDataEvents)
 
-    this.eventState$ = this.state$
-      .filter((state) => state.type === 'event')
+    const isOfTypeEvent = (state) => state.type === 'event'
+    this.eventState$ = this.state$.filter(isOfTypeEvent)
   }],
   ngOnInit () {
-    this.subscription = backendMessage$.subscribe((message) => {
+    const onNewMessageFromExtensionBackend = (message) => {
       console.log('backend -> panel')
       this.state$.next(message)
-      this._ngZone.run(() => {})
-    })
+      const forceTriggerZonetick = () => {}
+      const batscannerPanelComponentForceZoneTick =
+        () => this._ngZone.run(forceTriggerZonetick)
+      window.requestIdleCallback(batscannerPanelComponentForceZoneTick)
+    }
+    this.subscription = backendMessage$
+      .subscribe(onNewMessageFromExtensionBackend)
 
     connectToTab()
   },
