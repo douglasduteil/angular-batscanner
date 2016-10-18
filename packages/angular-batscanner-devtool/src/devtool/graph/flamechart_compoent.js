@@ -109,28 +109,7 @@ Component({
     }
 
     if (changes.data && this.data) {
-      this.startTime = this.startTime || (this.data[0] || {}).timestamp
-      this.endTime = (this.data[this.data.length - 1] || {}).timestamp
-
-      const minmaxdomain = d3.extent([this.startTime, this.endTime])
-      this.x.domain(minmaxdomain)
-
-      const IdDepthMap = this.data.reduce((memo, e) => {
-        if (Number.isNaN(Number(memo[e.id]))) {
-          memo[e.id] = memo.length
-          memo.length += 1
-        }
-        return memo
-      }, {length: 0})
-
-      const getDepthFromId = (id) => IdDepthMap[id]
-      const newSerie = this.data.map((e) => {
-        return Object.assign({}, e, {
-          depth: getDepthFromId(e.id)
-        })
-      })
-
-      this.series = this.series.concat(newSerie)
+      this.update()
     }
   },
 
@@ -244,6 +223,31 @@ Component({
         .attr('x', '-5')
   },
 
+  update () {
+    const lastEvent = this.data[this.data.length - 1] || {}
+    this.startTime = this.startTime || (this.data[0] || {}).timestamp
+    this.endTime = lastEvent.timestamp + lastEvent.duration
+
+    const minmaxdomain = d3.extent([this.startTime, this.endTime])
+    this.x.domain(minmaxdomain)
+
+    const IdDepthMap = this.data.reduce((memo, e) => {
+      if (Number.isNaN(Number(memo[e.id]))) {
+        memo[e.id] = memo.length
+        memo.length += 1
+      }
+      return memo
+    }, {length: 0})
+
+    const getDepthFromId = (id) => IdDepthMap[id]
+    const newSerie = this.data.map((e) => {
+      return Object.assign({}, e, {
+        depth: getDepthFromId(e.id)
+      })
+    })
+
+    this.series = this.series.concat(newSerie)
+  },
   //
 
   _zoomed () {
