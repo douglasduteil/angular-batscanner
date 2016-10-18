@@ -114,6 +114,13 @@ Component({
 
   //
 
+  clear () {
+    this.startTime = null
+    this.endTime = null
+    this.data = []
+    this.series = []
+  },
+
   initialize () {
     this.x = d3.scaleLinear()
       .domain([0, 1000])

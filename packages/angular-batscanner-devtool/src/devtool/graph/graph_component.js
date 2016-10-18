@@ -105,6 +105,13 @@ Component({
 
   //
 
+  clear () {
+    this.flamechart.clear()
+    this.overview.clear()
+  },
+
+  //
+
   _onOverviewBushed (event) {
     const s = event.selection || this.overview.x.range()
 

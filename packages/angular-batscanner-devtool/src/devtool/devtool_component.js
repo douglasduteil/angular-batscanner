@@ -73,19 +73,6 @@ Component({
     this.stateSource$ = new Subject()
     this.closingNotifier$ = new Subject()
 
-    /*
-    this.graphState$ = this.closingNotifier$
-      .startWith(null)
-      .switchMap((e) => {
-        return this.stateSource$
-          .scan((memo, val) => {
-            return memo.concat(val)//.concat([null])
-          }, [])
-          .do((latest) => { this.graphState = latest })
-          .startWith(this.graphState)
-      })
-    */
-
     this.graphState$ = this.closingNotifier$
       .startWith(null)
       .switchMap((e) => {
@@ -105,9 +92,9 @@ Component({
   //
 
   clearRecording (graph) {
-    graph.data = []
-    graph.proporstionData = []
-    graph._render()
+    graph.clear()
+
+    this.stateSource$.next(null)
   },
 
   toggleRecord () {
