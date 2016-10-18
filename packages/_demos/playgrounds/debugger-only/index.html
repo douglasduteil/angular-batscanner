@@ -71,6 +71,7 @@
       BATSCANNER_ROOT_COMPONENT,
       BATSCANNER_PROVIDERS,
       BatscannerEventEmitter,
+      BatscannerPerformanceMarkEmitter,
       BatscannerRainbowConsoleEmitter
     } = angularBatscannerCore
     const { DevToolModule } = angularBatscannerDevtool
@@ -225,8 +226,20 @@
     const compilerOptions = {
       providers: [
         BATSCANNER_PROVIDERS,
-        {provide: BATSCANNER_ROOT_COMPONENT, useValue: DebbugerOnlyDemoAppComponent},
-        {provide: BatscannerEventEmitter, useClass: BatscannerRainbowConsoleEmitter}
+        {
+          provide: BATSCANNER_ROOT_COMPONENT,
+          useValue: DebbugerOnlyDemoAppComponent
+        },
+        {
+          provide: BatscannerEventEmitter,
+          useClass: BatscannerRainbowConsoleEmitter,
+          multi: true
+        },
+        {
+          provide: BatscannerEventEmitter,
+          useClass: BatscannerPerformanceMarkEmitter,
+          multi: true
+        }
       ]
     }
 

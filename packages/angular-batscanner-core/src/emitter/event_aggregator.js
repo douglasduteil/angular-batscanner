@@ -1,7 +1,7 @@
 //
 
 import {
-  __core_private__ as ngCorePrivateParts // eslint-disable-line camelcase
+  __core_private__ as ngCorePrivateParts
 } from '@angular/core'
 
 import {Observable} from 'rxjs/Observable'
@@ -62,6 +62,7 @@ function aggregateUntill (source, componentToken) {
     const buffer$ = source
       .map(function (event) {
         const latestState = latestComponentState[event.id]
+        event.duration = (event.end - event.start) || 0.001
         if (latestState) {
           latestState.next = event.timestamp
           event.previous = latestState.timestamp

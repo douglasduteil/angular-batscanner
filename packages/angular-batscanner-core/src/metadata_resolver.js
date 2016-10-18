@@ -11,14 +11,13 @@ import {
 } from '@angular/core'
 
 import {BatscannerEventEmitter} from './emitter/event_emitter.js'
-import {needToBeScaned, markAsScaned} from './metadata_reflector.js'
+import {needToBeScaned, markAsScaned, assignBatscannerId} from './metadata_reflector.js'
 import {BATSCANNER_ID} from './constant.js'
 
 //
 
 const { LifecycleHooks, LIFECYCLE_HOOKS_VALUES } = ngCorePrivateParts
 const { CompileMetadataResolver } = ngCompilerPrivateParts
-let GLOBAL_ID = 0
 
 //
 
@@ -46,104 +45,162 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
     )
 
     this._eventEmitter = _injector.get(BatscannerEventEmitter)
+
     this.isDirective = (type) => Boolean(_directiveResolver.resolve(type, false))
     this.isPipe = (type) => Boolean(_pipeResolver.resolve(type, false))
   }
 
   getTypeMetadata (directiveType, moduleUrl, dependencies) {
-    const emitter = this._eventEmitter
+    const superGetTypeMetadata =
+      (directiveType) => super.getTypeMetadata(
+        directiveType, moduleUrl, dependencies
+      )
+
     directiveType = resolveForwardRef(directiveType)
 
-    if (this.isPipe(directiveType) && needToBeScaned(directiveType)) {
-      markAsScaned(directiveType)
-      // console.log('hooks on pipe ', directiveType.name)
-      const existingTransform = directiveType.prototype.transform
-      if (!existingTransform) {
-        return super.getTypeMetadata(directiveType, moduleUrl, dependencies)
-      }
-      directiveType.prototype.transform = function transformBatScanner () {
-        // console.log('ngPipeTransform', directiveType.name, Array.from(arguments))
-        const start = window.performance.now()
-        const result = existingTransform.call(this, ...arguments)
-        const end = window.performance.now()
+    return false ||
+      this._scanTransformPipeHook(directiveType, superGetTypeMetadata) ||
+      this._scanDirectiveHook(directiveType, superGetTypeMetadata) ||
+      superGetTypeMetadata(directiveType)
+  }
+
+  //
+
+  _emitEvent (emitFn) {
+    this._eventEmitter.forEach(emitFn)
+  }
+
+  _emitNextEvent (event) {
+    const emitNext = (emitter) => emitter.next && emitter.next(event)
+    this._emitEvent(emitNext)
+  }
+
+  _emitPreviousEvent (event) {
+    const emitPrevious = (emitter) => emitter.previous && emitter.previous(event)
+    this._emitEvent(emitPrevious)
+  }
+
+  _scanDirectiveHook (directiveType, superGetTypeMetadata) {
+    const haveToScanDirective =
+      this.isDirective(directiveType) && needToBeScaned(directiveType)
+
+    const emitPreviousEvent = this._emitPreviousEvent.bind(this)
+    const emitNextEvent = this._emitNextEvent.bind(this)
+
+    if (!haveToScanDirective) {
+      return
+    }
+
+    markAsScaned(directiveType)
+
+    directiveType.prototype = LIFECYCLE_HOOKS_VALUES.reduce(
+      function activateAllTheHooks (proto, lifecycleHook) {
+        const lifecycleHookName = LifecycleHooks[lifecycleHook]
+        const ngLifecycleHookName = `ng${lifecycleHookName}`
+        const existingHook = proto[ngLifecycleHookName]
+        const batscannerHookFnName = `${ngLifecycleHookName}BatScanner`
+
+        // HACK(douglasduteil): ensure the hook function in named
+        // Named function are the best ! Specially in the timeline devtool
+        // This hack ensure that, when called by Angular, the batcanner hook fn
+        // is named according the current event.
+        //
+        // eslint-disable-next-line no-new-func
+        proto[ngLifecycleHookName] = new Function('fn', `
+          return function ${batscannerHookFnName} () {
+            return fn.apply(this,arguments)
+          }
+        `)(lifecycleHookFn)
+
+        return proto
 
         //
 
-        if (!this[BATSCANNER_ID]) {
-          this[BATSCANNER_ID] = GLOBAL_ID++
+        function lifecycleHookFn (changes) {
+          assignBatscannerId(this)
+
+          //
+
+          // TODO(@douglasduteil): Cached inside the object
+          const staticMeta = {
+            id: this[BATSCANNER_ID],
+            type: lifecycleHookName,
+            targetName: directiveType.name,
+            target: directiveType,
+            changes: changes
+          }
+
+          emitPreviousEvent(Object.assign({}, staticMeta, {
+            timestamp: window.performance.now()
+          }))
+
+          const start = window.performance.now()
+          if (existingHook) {
+            existingHook.call(this, changes)
+          }
+          const end = window.performance.now()
+
+          emitNextEvent(Object.assign({}, staticMeta, {
+            end,
+            start,
+            timestamp: window.performance.now()
+          }))
         }
-        emitter.next({
-          id: this[BATSCANNER_ID],
-          end,
-          start,
-          timestamp: window.performance.now(),
-          type: 'ngPipeTransform',
-          targetName: directiveType.name,
-          target: directiveType,
-          arguments: Array.from(arguments)
-        })
+      },
+      directiveType.prototype
+    )
 
-        return result
-      }
+    return superGetTypeMetadata(directiveType)
+  }
 
-      return super.getTypeMetadata(directiveType, moduleUrl, dependencies)
+  _scanTransformPipeHook (pipeType, superGetTypeMetadata) {
+    const haveToScanThisPipe =
+      this.isPipe(pipeType) && needToBeScaned(pipeType)
+    const existingTransform = (pipeType.prototype || {}).transform
+
+    const emitPreviousEvent = this._emitPreviousEvent.bind(this)
+    const emitNextEvent = this._emitNextEvent.bind(this)
+
+    if (!haveToScanThisPipe || !existingTransform) {
+      return
     }
-    if (!this.isDirective(directiveType) || !needToBeScaned(directiveType)) {
-      return super.getTypeMetadata(directiveType, moduleUrl, dependencies)
-    }
 
-    //
+    markAsScaned(pipeType)
 
-    markAsScaned(directiveType)
-    // console.log('hooks on directive ', directiveType.name)
+    pipeType.prototype.transform = function transformBatScanner () {
+      assignBatscannerId(this)
 
-    //
-
-    directiveType.prototype = LIFECYCLE_HOOKS_VALUES.reduce(function (proto, lifecycleHook) {
-      const lifecycleHookName = LifecycleHooks[lifecycleHook]
-      const existingHook = proto[`ng${lifecycleHookName}`]
-      const batscannerHookFnName = `ng${lifecycleHookName}BatScanner`
-
-      function lifecycleHookFn (changes) {
-         // console.log(`ng${lifecycleHookName}`, directiveType.name, Array.from(arguments))
-        const start = window.performance.now()
-        if (existingHook) {
-          existingHook.call(this, changes)
-        }
-        const end = window.performance.now()
-
-        if (!this[BATSCANNER_ID]) {
-          this[BATSCANNER_ID] = GLOBAL_ID++
-        }
-
-        emitter.next({
-          id: this[BATSCANNER_ID],
-          end,
-          start,
-          timestamp: start,
-          type: lifecycleHookName,
-          targetName: directiveType.name,
-          target: directiveType,
-          changes: changes
-        })
-      }
-
-      // HACK(douglasduteil): ensure the hook function in named
-      // Named function are the best ! Specially in the timeline devtool
-      // This hack ensure that, when called by Angular, the batcanner hook fn
-      // is named according the current event.
       //
-      // eslint-disable-next-line no-new-func
-      proto[`ng${lifecycleHookName}`] = new Function('fn', `
-        return function ${batscannerHookFnName} () {
-          return fn.apply(this,arguments)
-        }
-      `)(lifecycleHookFn)
 
-      return proto
-    }, directiveType.prototype)
+      // TODO(@douglasduteil): Cached inside the object
+      const staticMeta = {
+        arguments: Array.from(arguments),
+        id: this[BATSCANNER_ID],
+        target: pipeType,
+        targetName: pipeType.name,
+        type: 'ngPipeTransform'
+      }
 
-    return super.getTypeMetadata(directiveType, moduleUrl, dependencies)
+      //
+
+      emitPreviousEvent(Object.assign({}, staticMeta, {
+        timestamp: window.performance.now()
+      }))
+
+      const start = window.performance.now()
+      const result = existingTransform.call(this, ...arguments)
+      const end = window.performance.now()
+
+      emitNextEvent(Object.assign({}, staticMeta, {
+        end,
+        start,
+        timestamp: window.performance.now()
+      }))
+
+      return result
+    }
+
+    return superGetTypeMetadata(pipeType)
   }
 }
 

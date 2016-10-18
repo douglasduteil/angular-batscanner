@@ -7,7 +7,6 @@ import {
 import {BatScannerCompileMetadataResolver} from './metadata_resolver.js'
 import {
   BatscannerEventEmitter,
-  BatscannerWindowPostMessageEmitter,
   BatscannerEventAggregator
 } from './emitter/index.js'
 
@@ -25,7 +24,7 @@ export const BATSCANNER_PROVIDERS = [
   // {provide: BATSCANNER_ROOT_COMPONENT, useValue: ''},
 
   {provide: CompileMetadataResolver, useClass: BatScannerCompileMetadataResolver},
-  {provide: BatscannerEventEmitter, useClass: BatscannerWindowPostMessageEmitter},
+  {provide: BatscannerEventEmitter, useClass: BatscannerEventEmitter, multi: true},
 
   //
 
