@@ -27,7 +27,6 @@ const LIKECYCLE_HOOKS = [
 const virginProportionEntry = LIKECYCLE_HOOKS
   .reduce((memo, val) => Object.assign(memo, {[val]: 0}), {})
 
-
 const log = console.log.bind(null, '%cOverviewBrushComponent%c#', 'color: #2980b9', 'color: #333')
 
 //
@@ -78,7 +77,7 @@ Component({
     this.stack = d3.stack()
       .keys(LIKECYCLE_HOOKS)
       .order(d3.stackOrderNone)
-      .offset(d3.stackOffsetNone)
+      .offset(d3.stackOffsetExpand)
 
     this.color = (type) => d3.rgb(LifecycleHooksColors[type])
   }],
@@ -89,14 +88,7 @@ Component({
     }
 
     if (changes.data && this.area && this.data) {
-      this.startTime = this.startTime || (this.data[0] || {}).timestamp
-      this.endTime = (this.data[this.data.length - 1] || {}).timestamp
-
-      const processAndAssignNewSerie = () => {
-        const proporstionData = calculateEventProportion(this.data, this.startTime, proporstionData)
-        this.series = this.series.concat(this.stack(proporstionData))
-      }
-      window.requestIdleCallback(processAndAssignNewSerie)
+      this.update()
     }
   },
 
@@ -154,7 +146,7 @@ Component({
   render () {
     const minmaxdomain = d3.extent([this.startTime, this.endTime])
     this.x.domain(minmaxdomain)
-    this.y.domain([10, 0])
+    //this.y.domain([10, 0])
 
     const areaChart = (context) => {
       const selection = context.selection ? context.selection() : context
@@ -170,6 +162,20 @@ Component({
     d3.select(this.areaElement.nativeElement).call(areaChart)
     d3.select(this.axisElement.nativeElement).call(this.xAxis)
     d3.select(this.brushElement.nativeElement).call(this.brush)
+  },
+
+  update () {
+    const lastEvent = this.data[this.data.length - 1] || {}
+    this.startTime = this.startTime || (this.data[0] || {}).timestamp
+    this.endTime = lastEvent.timestamp + lastEvent.duration
+
+    const processAndAssignNewSerie = () => {
+      const proporstionData = calculateEventProportion(this.data, this.startTime, proporstionData)
+      // console.log(this.stack(proporstionData))
+      this.series = this.series.concat(this.stack(proporstionData))
+    }
+
+    window.requestIdleCallback(processAndAssignNewSerie)
   },
 
   //
@@ -198,21 +204,28 @@ function calculateEventProportion (data, relativeTime, proportionsDataOutput) {
     const lastDepth = memo.depthMap[lastEvent.id] || -1
     const currentDepth = memo.depthMap[event.id] || 1
 
-    if (currentDepth === lastDepth) {
+    if (currentDepth <= lastDepth) {
       eventStack.pop()
     }
 
-    if (currentDepth >= lastDepth) {
-      eventStack.push(Object.assign({}, event, {
-        depth: currentDepth
-      }))
-    } else {
+    // HACK(douglasduteil): Double LOL-i-pop()
+    // When going back to a parent event we have to remove the child and the
+    // current parent state ( ಠ ಠ )
+    if (currentDepth < lastDepth) {
       eventStack.pop()
     }
+
+    eventStack.push(Object.assign({}, event, {
+      depth: currentDepth
+    }))
+
+    const nextEvent = data[index + 1]
+    const nextEventTimestamp = nextEvent ? nextEvent.timestamp : event.timestamp + event.duration
+    const middleTimestampDuration = (nextEventTimestamp - event.timestamp) / 2
 
     memo.eventStacks.push({
       stack: eventStack,
-      timestamp: event.timestamp + (event.duration / 2)
+      timestamp: event.timestamp + middleTimestampDuration
     })
 
     return memo
