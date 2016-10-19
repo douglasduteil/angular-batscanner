@@ -23,6 +23,7 @@ const LIKECYCLE_HOOKS = [
   'AfterViewChecked',
   'OnDestroy'
 ]
+const dis = 20
 
 const virginProportionEntry = LIKECYCLE_HOOKS
   .reduce((memo, val) => Object.assign(memo, {[val]: 0}), {})
@@ -74,6 +75,9 @@ Component({
   constructor: [function OverviewBrushComponent () {
     this.brushEmitter = new EventEmitter()// .debounceTime(50)
     this.series = []
+    this.seriesDomains = []
+    this.axisDomain = []
+
     this.stack = d3.stack()
       .keys(LIKECYCLE_HOOKS)
       .order(d3.stackOrderNone)
@@ -111,6 +115,8 @@ Component({
     this.endTime = null
     this.data = []
     this.series = []
+    this.seriesDomains = []
+    this.axisDomain = []
   },
 
   initialize () {
@@ -144,10 +150,6 @@ Component({
   },
 
   render () {
-    const minmaxdomain = d3.extent([this.startTime, this.endTime])
-    this.x.domain(minmaxdomain)
-    //this.y.domain([10, 0])
-
     const areaChart = (context) => {
       const selection = context.selection ? context.selection() : context
       const path = selection.selectAll('path').data(this.series)
@@ -171,7 +173,36 @@ Component({
 
     const processAndAssignNewSerie = () => {
       const proporstionData = calculateEventProportion(this.data, this.startTime, proporstionData)
-      // console.log(this.stack(proporstionData))
+
+      const dataExtent = [(this.data[0] || {}).timestamp, this.endTime]
+      this.seriesDomains.push(dataExtent)
+
+      const seriesDistances = this.seriesDomains
+        .map((serieDomain) => serieDomain[1] - serieDomain[0])
+
+      const totalSerieDistance = seriesDistances
+        .reduce((memo, domainLenght) => memo + domainLenght, 0)
+
+      const middleRanges = seriesDistances.slice(0, -1).reduce((memo, domainLenght, i) => {
+        const last = memo[memo.length - 1] || 0
+        const pos = last + (this.width * (domainLenght / totalSerieDistance))
+        memo.push(pos - dis)
+        memo.push(pos + dis)
+        return memo
+      }, [])
+
+      const axisRange = []
+        .concat([0])
+        .concat(middleRanges)
+        .concat([this.width])
+
+      this.axisDomain = this.axisDomain.concat(
+        d3.extent(dataExtent)
+      )
+
+      this.x.domain(this.axisDomain)
+        .range(axisRange)
+
       this.series = this.series.concat(this.stack(proporstionData))
     }
 
