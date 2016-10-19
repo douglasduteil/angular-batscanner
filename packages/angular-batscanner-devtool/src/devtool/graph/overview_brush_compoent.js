@@ -8,8 +8,10 @@ import {
   ViewEncapsulation
 } from '@angular/core'
 
-import {LifecycleHooksColors} from './lifecycle_hooks_colors.js'
 import * as d3 from 'd3'
+
+import {LifecycleHooksColors} from './lifecycle_hooks_colors.js'
+import {polylinearRangeFromDomains} from './sdf.js'
 
 //
 
@@ -23,7 +25,6 @@ const LIKECYCLE_HOOKS = [
   'AfterViewChecked',
   'OnDestroy'
 ]
-const dis = 20
 
 const virginProportionEntry = LIKECYCLE_HOOKS
   .reduce((memo, val) => Object.assign(memo, {[val]: 0}), {})
@@ -172,29 +173,18 @@ Component({
     this.endTime = lastEvent.timestamp + lastEvent.duration
 
     const processAndAssignNewSerie = () => {
-      const proporstionData = calculateEventProportion(this.data, this.startTime, proporstionData)
+      const proporstionData = calculateEventProportion(
+        this.data, this.startTime, proporstionData
+      )
 
-      const dataExtent = [(this.data[0] || {}).timestamp, this.endTime]
+      const ascSort = (a, b) => a - b
+      const dataExtent = [(this.data[0] || {}).timestamp, this.endTime].sort(ascSort)
       this.seriesDomains.push(dataExtent)
 
-      const seriesDistances = this.seriesDomains
-        .map((serieDomain) => serieDomain[1] - serieDomain[0])
-
-      const totalSerieDistance = seriesDistances
-        .reduce((memo, domainLenght) => memo + domainLenght, 0)
-
-      const middleRanges = seriesDistances.slice(0, -1).reduce((memo, domainLenght, i) => {
-        const last = memo[memo.length - 1] || 0
-        const pos = last + (this.width * (domainLenght / totalSerieDistance))
-        memo.push(pos - dis)
-        memo.push(pos + dis)
-        return memo
-      }, [])
-
-      const axisRange = []
-        .concat([0])
-        .concat(middleRanges)
-        .concat([this.width])
+      const axisRange = polylinearRangeFromDomains({
+        domains: this.seriesDomains,
+        range: [0, this.width]
+      })
 
       this.axisDomain = this.axisDomain.concat(
         d3.extent(dataExtent)
@@ -214,6 +204,9 @@ Component({
   _brushed () {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') {
       return // ignore brush-by-zoom
+    }
+    if (d3.event.type === 'end') {
+      return // ignore brush-by-zoom end event
     }
 
     this.brushEmitter.next(d3.event)

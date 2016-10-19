@@ -14,6 +14,8 @@ import {Observable} from 'rxjs/Observable'
 
 import * as d3 from 'd3'
 
+import {polylinearRangeFromDomains} from './sdf.js'
+
 //
 
 const LIKECYCLE_HOOKS = [
@@ -113,9 +115,34 @@ Component({
   //
 
   _onOverviewBushed (event) {
+    console.log('_onOverviewBushed', event)
     const s = event.selection || this.overview.x.range()
+    console.log(s)
+    const ascSort = (a, b) => a - b
+    const [sdMin, sdMax] = s.map(this.overview.x.invert).sort(ascSort)
+    if (sdMin === sdMax) {
+      return
+    }
 
-    this.flamechart.x.domain(s.map(this.overview.x.invert, this.overview.x))
+    const sDomain = this.overview.seriesDomains
+      .filter(([dMin, dMax]) => dMax >= sdMin && dMin <= sdMax)
+
+    if (!sDomain.length) {
+      return
+    }
+
+    sDomain[0][0] = sdMin
+    sDomain[sDomain.length - 1][1] = sdMax
+
+    const axisRange = polylinearRangeFromDomains({
+      domains: sDomain,
+      range: [0, this.flamechart.width]
+    })
+
+    this.flamechart.x
+      .domain(sDomain.reduce((memo, sub) => memo.concat(sub), []))
+      .range(axisRange)
+
     d3.select(this.flamechart.axisElement.nativeElement)
       .call(this.flamechart.xAxis)
 
@@ -131,9 +158,15 @@ Component({
   },
 
   _onFlameChartZoom (event) {
+    console.log('_onFlameChartZoom', event)
     const t = event.transform
-
+    console.log(t)
+    console.log(t.rescaleX(this.overview.x).domain())
+    console.log(this.flamechart.x.range().map(t.invertX, t))
     this.flamechart.x.domain(t.rescaleX(this.overview.x).domain())
+    // HACK(@douglasduteil): force range back to normal
+    // Might be better to not change the range on brush...
+    this.flamechart.x.range(this.overview.x.range())
 
     d3.select(this.flamechart.axisElement.nativeElement)
       .call(this.flamechart.xAxis)
@@ -141,7 +174,7 @@ Component({
     d3.select(this.overview.brushElement.nativeElement)
       .call(
         this.overview.brush.move,
-        this.flamechart.x.range().map(t.invertX, t)
+        d3.extent(this.flamechart.x.range().map(t.invertX, t))
       )
 
     d3.select(this.flamechart.flameGroupElement.nativeElement)

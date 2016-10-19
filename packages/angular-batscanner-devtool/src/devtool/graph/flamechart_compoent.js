@@ -10,6 +10,8 @@ import {
 } from '@angular/core'
 
 import {LifecycleHooksColors} from './lifecycle_hooks_colors.js'
+import {polylinearRangeFromDomains} from './sdf.js'
+
 import * as d3 from 'd3'
 
 //
@@ -95,6 +97,8 @@ Component({
   constructor: [function FlamechartComponent () {
     this.zoomEmitter = new EventEmitter() // .debounceTime(150)
     this.series = []
+    this.seriesDomains = []
+    this.axisDomain = []
 
     this.color = (type) => LifecycleHooksColors[type]
   }],
@@ -228,8 +232,20 @@ Component({
     this.startTime = this.startTime || (this.data[0] || {}).timestamp
     this.endTime = lastEvent.timestamp + lastEvent.duration
 
-    const minmaxdomain = d3.extent([this.startTime, this.endTime])
-    this.x.domain(minmaxdomain)
+    const dataExtent = [(this.data[0] || {}).timestamp, this.endTime]
+    this.seriesDomains.push(dataExtent)
+
+    const axisRange = polylinearRangeFromDomains({
+      domains: this.seriesDomains,
+      range: [0, this.width]
+    })
+
+    this.axisDomain = this.axisDomain.concat(
+      d3.extent(dataExtent)
+    )
+
+    this.x.domain(this.axisDomain)
+      .range(axisRange)
 
     const IdDepthMap = this.data.reduce((memo, e) => {
       if (Number.isNaN(Number(memo[e.id]))) {
@@ -251,6 +267,8 @@ Component({
   //
 
   _zoomed () {
+    console.log(d3.event, d3.event.type)
+    console.log(d3.event.sourceEvent, d3.event.sourceEvent.type)
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'brush') {
       return // ignore zoom-by-brush
     }
