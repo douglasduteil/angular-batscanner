@@ -115,39 +115,23 @@ Component({
   //
 
   _onOverviewBushed (event) {
-    console.log('_onOverviewBushed', event)
     const s = event.selection || this.overview.x.range()
-    console.log(s)
-    const ascSort = (a, b) => a - b
-    const [sdMin, sdMax] = s.map(this.overview.x.invert).sort(ascSort)
-    if (sdMin === sdMax) {
-      return
-    }
+    const zoom = this.flamechart.width / (s[1] - s[0])
+    const x = s[0] * zoom
 
-    const sDomain = this.overview.seriesDomains
-      .filter(([dMin, dMax]) => dMax >= sdMin && dMin <= sdMax)
+    const rescaleX = this.overview.x.copy().domain(
+      this.overview.x.range()
+        .map((rx) => (rx + x) / zoom)
+        .map(this.overview.x.invert, this.overview.x)
+    )
 
-    if (!sDomain.length) {
-      return
-    }
-
-    sDomain[0][0] = sdMin
-    sDomain[sDomain.length - 1][1] = sdMax
-
-    const axisRange = polylinearRangeFromDomains({
-      domains: sDomain,
-      range: [0, this.flamechart.width]
-    })
-
-    this.flamechart.x
-      .domain(sDomain.reduce((memo, sub) => memo.concat(sub), []))
-      .range(axisRange)
+    this.flamechart.x.domain(rescaleX.domain())
 
     d3.select(this.flamechart.axisElement.nativeElement)
       .call(this.flamechart.xAxis)
 
     const zoomTransform = d3.zoomIdentity
-      .scale(this.svgWidth / (s[1] - s[0]))
+      .scale(zoom)
       .translate(-s[0], 0)
 
     d3.select(this.flamechart.zoomElement.nativeElement)

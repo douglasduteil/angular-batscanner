@@ -159,8 +159,7 @@ Component({
 
   flames (context) {
     const selection = context.selection ? context.selection() : context
-    const minX = this.x.domain()[0]
-    const sizeX = (posX) => this.x(minX + posX)
+    const sizeX = (posX) => this.x(this.x.invert(0) + posX)
 
     const flame = selection.selectAll('.flame')
       .data(this.series)
