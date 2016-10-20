@@ -1,14 +1,15 @@
 {
   "name": "angular-batscanner",
   "version": "0.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Angular 2 BatScanner monorepo",
+  "main": false,
   "private": true,
   "scripts": {
     "lerna": "lerna",
     "lint": "eslint . --cache",
     "start": "lerna run start",
-    "test": "lerna run test"
+    "pretest": "npm run lint",
+    "test": "echo && echo \"ʕ•̫͡•ོʔ•̫͡•ཻʕ•̫͡•ʔ•͓͡•ʔ\" && echo \"Nooooope\"  && echo && lerna run test"
   },
   "keywords": [],
   "author": "Douglas Duteil <douglasduteil@gmail.com> (douglasduteil.github.io)",

@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "start": "npm-run-all --parallel watch:*",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"(╯°□°）╯︵ ┻━┻\" && exit 0",
     "server": "live-server --no-browser --open=playgrounds",
     "watch:server": "npm run server -- --watch=index.html,playgrounds,node_modules/angular-batscanner-core/lib,node_modules/angular-batscanner-devtool/lib",
     "watch:build": "chokidar 'scripts/**/*.js' 'playgrounds/**/*.js' -i 'playgrounds/*/lib' -c 'npm run build' --initial"
