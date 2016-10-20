@@ -44,6 +44,16 @@ Component({
     svg {
       flex: 1;
     }
+
+    .flame-chart-entry-info {
+      z-index: 200;
+      position: absolute;
+      background-color: white;
+      pointer-events: none;
+      visibility: hidden;
+      padding: 5px 10px;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
   `],
   template: `
     <svg
@@ -85,6 +95,8 @@ Component({
   ngOnInit () {
     const rootSvgGraphComponentReattachChangeDetector =
       () => { this._ref.reattach() }
+
+    this.flamechart.tooltipElement = this.tooltipElement
 
     Observable.fromEvent(window, 'resize')
       .do(() => this._ref.detach())

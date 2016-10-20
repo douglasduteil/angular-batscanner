@@ -167,12 +167,21 @@ Component({
     const selection = context.selection ? context.selection() : context
     const sizeX = (d) => this.x(d.timestamp + (d.duration || 1)) - this.x(d.timestamp)
 
+    const tooltip = d3.select(this.tooltipElement.nativeElement)
+
     const flame = selection.selectAll('.flame')
       .data(this.series)
     const flameExit = flame.exit()
     const flameEnter = flame.enter()
       .append('g')
       .attr('class', 'flame')
+      .on('mouseover', () => tooltip.style('visibility', 'visible'))
+      .on('mousemove', (d) => tooltip
+        .style('left', `${d3.event.pageX + 10}px`)
+        .style('top', `${d3.event.pageY}px`)
+        .text(`${(d.duration || 0).toFixed(2)} ms - ${d.type} @ ${d.targetName}`)
+      )
+      .on('mouseout', () => tooltip.style('visibility', 'hidden'))
 
     flameEnter.merge(flame)
       .attr('transform', (d, i) =>
