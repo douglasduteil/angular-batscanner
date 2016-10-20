@@ -1,5 +1,9 @@
 //
 
+import * as d3 from 'd3'
+
+//
+
 const dis = 20
 
 export function polylinearRangeFromDomains (options) {
@@ -23,4 +27,27 @@ export function polylinearRangeFromDomains (options) {
     .concat([min])
     .concat(middleRanges)
     .concat([max])
+}
+
+export function axisTicks (options) {
+  const {domains, x} = options
+  const [xdMin, xdMax] = d3.extent(x.domain())
+  const seriesScales = domains
+    .filter(([dMin, dMax]) => dMax >= xdMin && dMin <= xdMax)
+    .map(
+      (domain, i) => x.copy()
+        .domain(domain)
+        .range(x.range().slice(i * 2, (i * 2) + 2))
+    )
+  const rDistance = distance(d3.extent(x.domain()))
+  const ticks = seriesScales.reduce((memo, scale) => {
+    const coef = distance(scale.domain()) / rDistance
+    return memo.concat(scale.ticks(10 * coef))
+  }, [])
+
+  return ticks
+}
+
+function distance ([min, max]) {
+  return max - min
 }

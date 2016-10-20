@@ -14,22 +14,9 @@ import {Observable} from 'rxjs/Observable'
 
 import * as d3 from 'd3'
 
-import {polylinearRangeFromDomains} from './sdf.js'
+import {axisTicks, polylinearRangeFromDomains} from './sdf.js'
 
 //
-
-const LIKECYCLE_HOOKS = [
-  'OnChanges',
-  'OnInit',
-  'DoCheck',
-  'AfterContentInit',
-  'AfterContentChecked',
-  'AfterViewInit',
-  'AfterViewChecked',
-  'ngOnDestroy'
-]
-const itemHeight = 25
-const minimalMilliscondToDisplayText = 25
 
 const log = console.log.bind(null, '%cRootSvgGraphComponent%c#', 'color: #1abc9c', 'color: #333')
 //
@@ -115,9 +102,7 @@ Component({
   //
 
   _onOverviewBushed (event) {
-    // log('_onOverviewBushed', event)
     const s = event.selection || this.overview.x.range()
-    // log(s)
 
     this._updateFlamechartScale(s)
 
@@ -146,7 +131,6 @@ Component({
     // log(t.rescaleX(this.overview.x).domain())
     // log(this.flamechart.x.range().map(t.invertX, t))
     this._updateFlamechartScale(s)
-
 
     this.flamechart.render()
 
@@ -190,6 +174,15 @@ Component({
     this.flamechart.x
       .domain(sDomain.reduce((memo, sub) => memo.concat(sub), []))
       .range(axisRange)
+
+    //
+
+    const tickValues = axisTicks({
+      domains: this.flamechart.seriesDomains,
+      x: this.flamechart.x
+    })
+
+    this.flamechart.xAxis.tickValues(tickValues)
   },
 
   _updateRootSVGSize () {

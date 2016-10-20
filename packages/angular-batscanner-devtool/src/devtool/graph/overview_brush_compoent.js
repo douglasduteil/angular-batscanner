@@ -11,7 +11,10 @@ import {
 import * as d3 from 'd3'
 
 import {LifecycleHooksColors} from './lifecycle_hooks_colors.js'
-import {polylinearRangeFromDomains} from './sdf.js'
+import {
+  axisTicks,
+  polylinearRangeFromDomains
+} from './sdf.js'
 
 //
 
@@ -193,6 +196,17 @@ Component({
 
       this.x.domain(this.axisDomain)
         .range(axisRange)
+
+      //
+
+      const tickValues = axisTicks({
+        domains: this.seriesDomains,
+        x: this.x
+      })
+
+      this.xAxis.tickValues(tickValues)
+
+      //
 
       this.series = this.series.concat(this.stack(proporstionData))
     }

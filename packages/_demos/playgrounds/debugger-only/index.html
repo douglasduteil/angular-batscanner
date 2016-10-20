@@ -141,7 +141,7 @@
 
         this.debuggerState$ = (new Subject())
           .do(() => {
-            startTime += 5000
+            startTime += 50000
             state = {idStack: [], maxDepth: 0}
           })
           .map((events) => events.reduce((memo, event, index) => {
@@ -184,8 +184,9 @@
 
         this.events = window.batscannerEventDb
 
-        setTimeout(() => this.trigger(this.events[3].data), 500)
-        //setTimeout(() => this.trigger(this.events[0].data), 700)
+        setTimeout(() => this.trigger(this.events[2].data), 500)
+        setTimeout(() => this.trigger(this.events[3].data), 700)
+        // setTimeout(() => this.trigger(this.events[0].data), 700)
       },
 
       ngOnDestroy () {
