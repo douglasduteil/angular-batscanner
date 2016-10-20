@@ -2,8 +2,10 @@
 
 import { BrowserModule } from '@angular/platform-browser'
 import { FormsModule } from '@angular/forms'
-import { NgModule } from '@angular/core'
-import { Component } from '@angular/core'
+import {
+  Component,
+  NgModule
+} from '@angular/core'
 
 import {Observable} from 'rxjs/Observable'
 import {Subject} from 'rxjs/Subject'

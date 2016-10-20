@@ -4,7 +4,6 @@ import * as d3 from 'd3'
 
 //
 
-const dis = 20
 const AXIS_SUBTICKS = 10
 
 export function polylinearRangeFromDomains (options) {

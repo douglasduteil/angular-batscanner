@@ -33,8 +33,6 @@ const LIKECYCLE_HOOKS = [
 const virginProportionEntry = LIKECYCLE_HOOKS
   .reduce((memo, val) => Object.assign(memo, {[val]: 0}), {})
 
-const log = console.log.bind(null, '%cOverviewBrushComponent%c#', 'color: #2980b9', 'color: #333')
-
 //
 
 export const OverviewBrushComponent =

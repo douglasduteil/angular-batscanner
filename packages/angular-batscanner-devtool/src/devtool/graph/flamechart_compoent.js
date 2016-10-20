@@ -3,7 +3,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
   EventEmitter,
   ViewChild,
   ViewEncapsulation
@@ -21,7 +20,6 @@ import * as d3 from 'd3'
 
 const itemHeight = 20
 const minimalMilliscondToDisplayText = 30
-const log = console.log.bind(null, '%cFlamechartComponent%c#', 'color: #c0392b', 'color: #333')
 
 //
 

@@ -4,7 +4,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  Renderer,
   ViewEncapsulation
 } from '@angular/core'
 

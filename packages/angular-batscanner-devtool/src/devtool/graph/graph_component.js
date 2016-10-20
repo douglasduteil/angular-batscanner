@@ -4,10 +4,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef,
   ViewChild,
-  ViewEncapsulation,
-  NgZone
+  ViewEncapsulation
 } from '@angular/core'
 
 import {Observable} from 'rxjs/Observable'
@@ -16,9 +14,6 @@ import * as d3 from 'd3'
 
 import {axisTicks, polylinearRangeFromDomains} from './graph_util.js'
 
-//
-
-const log = console.log.bind(null, '%cRootSvgGraphComponent%c#', 'color: #1abc9c', 'color: #333')
 //
 
 export const RootSvgGraphComponent =
