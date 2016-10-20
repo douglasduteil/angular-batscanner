@@ -98,7 +98,7 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
         const lifecycleHookName = LifecycleHooks[lifecycleHook]
         const ngLifecycleHookName = `ng${lifecycleHookName}`
         const existingHook = proto[ngLifecycleHookName]
-        const batscannerHookFnName = `${ngLifecycleHookName}BatScanner`
+        const batscannerHookFnName = `${directiveType.name}_${ngLifecycleHookName}BatScanner`
 
         // HACK(douglasduteil): ensure the hook function in named
         // Named function are the best ! Specially in the timeline devtool
@@ -167,7 +167,23 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
 
     markAsScaned(pipeType)
 
-    pipeType.prototype.transform = function transformBatScanner () {
+    const batscannerHookFnName = `${pipeType.name}_transformBatScanner`
+
+    // HACK(douglasduteil): ensure the hook function in named
+    // Named function are the best ! Specially in the timeline devtool
+    // This hack ensure that, when called by Angular, the batcanner hook fn
+    // is named according the current event.
+    //
+    // eslint-disable-next-line no-new-func
+    pipeType.prototype.transform = new Function('fn', `
+      return function ${batscannerHookFnName} () {
+        return fn.apply(this,arguments)
+      }
+    `)(transformBatScanner)
+
+    //
+
+    function transformBatScanner () {
       assignBatscannerId(this)
 
       //
