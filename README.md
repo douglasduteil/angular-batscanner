@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="angular-batscanner-logo" src=".github/images/batscanner-logo.svg" width="546">
+  <img alt="angular-batscanner-logo" src=".github/images/batscanner-logo.png" width="546">
 
 </p>
 
