@@ -1,6 +1,6 @@
 {
   "name": "angular-batscanner_demos",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "",
   "main": false,
   "private": true,
@@ -34,8 +34,8 @@
     "@angular/platform-browser": "^2.0.0",
     "@angular/platform-browser-dynamic": "^2.0.0",
     "@angular/router": "^3.0.1",
-    "angular-batscanner-core": "^0.0.0",
-    "angular-batscanner-devtool": "^0.0.0",
+    "angular-batscanner-core": "^1.0.0",
+    "angular-batscanner-devtool": "^1.0.0",
     "d3": "^4.2.6",
     "reflect-metadata": "^0.1.8",
     "rxjs": "^5.0.0-beta.12",

@@ -1,6 +1,6 @@
 {
   "name": "angular-batscanner-devtool",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Angular 2 BatScanner devtool",
   "main": "lib/angular-batscanner-devtool.umd.js",
   "scripts": {
