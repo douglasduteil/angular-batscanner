@@ -29,5 +29,5 @@ export const LifecycleHooksColors = {
   [LifecycleHooks.AfterViewChecked]: 'hsl(315, 40%, 70%)', // purple/yellow
   [LifecycleHooks.OnDestroy]: 'hsl(0, 0%, 80%)', // gray
 
-  'ngPipeTransform': 'hsl(0, 50%, 70%)' //
+  'ngPipeTransform': 'hsl(0, 50%, 70%)' // brown
 }
