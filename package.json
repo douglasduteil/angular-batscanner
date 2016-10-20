@@ -7,8 +7,9 @@
   "scripts": {
     "lerna": "lerna",
     "lint": "eslint . --cache",
-    "start": "lerna run start",
     "pretest": "npm run lint",
+    "publish": "lerna publish",
+    "start": "lerna run start",
     "test": "echo && echo \"ʕ•̫͡•ོʔ•̫͡•ཻʕ•̫͡•ʔ•͓͡•ʔ\" && echo \"Nooooope\"  && echo && lerna run test"
   },
   "keywords": [],
