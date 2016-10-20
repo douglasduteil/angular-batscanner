@@ -111,21 +111,22 @@ Component({
   },
 
   ngOnChanges (changes) {
-    if (changes.width && this.x) {
-      this.x.range([0, this.width])
+    if (changes.data && this.data) {
+      const overviewComponentUpdate = () => this.update(this.data)
+      window.requestIdleCallback(overviewComponentUpdate)
     }
 
-    if (changes.data && this.data) {
-      this.update()
-    }
+    const overviewComponentUpdateViewModel = () => this.updateViewModel()
+    window.requestIdleCallback(overviewComponentUpdateViewModel)
   },
 
   ngAfterViewChecked () {
     const flamechartComponentRenderFrame = () => { this.render() }
-    window.requestIdleCallback(() => {
+    const flamechartComponentAskForRenderFrame = () => {
       // Scheduling the next render function after the last idle "frame"
       window.requestAnimationFrame(flamechartComponentRenderFrame)
-    })
+    }
+    window.requestIdleCallback(flamechartComponentAskForRenderFrame)
   },
 
   //
@@ -231,39 +232,19 @@ Component({
         .attr('x', '-5')
   },
 
-  update () {
-    //
-    const lastEvent = this.data[this.data.length - 1] || {}
-    this.startTime = this.startTime || (this.data[0] || {}).timestamp
+  update (data) {
+    const lastEvent = data[data.length - 1] || {}
+    this.startTime = this.startTime || (data[0] || {}).timestamp
     this.endTime = lastEvent.timestamp + lastEvent.duration
 
-    const dataExtent = [(this.data[0] || {}).timestamp, this.endTime]
+    const dataExtent = [(data[0] || {}).timestamp, this.endTime]
     this.seriesDomains.push(dataExtent)
-
-    const axisRange = polylinearRangeFromDomains({
-      domains: this.seriesDomains,
-      range: [0, this.width]
-    })
 
     this.axisDomain = this.axisDomain.concat(
       d3.extent(dataExtent)
     )
 
-    this.x.domain(this.axisDomain)
-      .range(axisRange)
-
-    //
-
-    const tickValues = axisTicks({
-      domains: this.seriesDomains,
-      x: this.x
-    })
-
-    this.xAxis.tickValues(tickValues)
-
-    //
-
-    const IdDepthMap = this.data.reduce((memo, e) => {
+    const IdDepthMap = data.reduce((memo, e) => {
       if (Number.isNaN(Number(memo[e.id]))) {
         memo[e.id] = memo.length
         memo.length += 1
@@ -272,7 +253,7 @@ Component({
     }, {length: 0})
 
     const getDepthFromId = (id) => IdDepthMap[id]
-    const newSerie = this.data.map((e) => {
+    const newSerie = data.map((e) => {
       return Object.assign({}, e, {
         depth: getDepthFromId(e.id)
       })
@@ -282,6 +263,24 @@ Component({
 
     this.series = this.series.concat(newSerie)
   },
+
+  updateViewModel () {
+    const axisRange = polylinearRangeFromDomains({
+      domains: this.seriesDomains,
+      range: [0, this.width]
+    })
+
+    this.x.domain(this.axisDomain)
+      .range(axisRange)
+
+    const tickValues = axisTicks({
+      domains: this.seriesDomains,
+      x: this.x
+    })
+
+    this.xAxis.tickValues(tickValues)
+  },
+
   //
 
   _zoomed () {

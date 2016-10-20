@@ -84,12 +84,18 @@ Component({
 
   ngOnInit () {
     Observable.fromEvent(window, 'resize')
-      .debounceTime(300)
+      .do(() => this._ref.detach())
+      .debounceTime(100)
       .startWith(null)
       .subscribe(() => {
+        log('resize')
         this._resize()
-        this._ref.detectChanges()
+        this._ref.reattach()
       })
+  },
+
+  ngOnDestroy () {
+    // TOOD(@douglasduteil): remove resize listener
   },
 
   //
@@ -117,19 +123,9 @@ Component({
   },
 
   _onFlameChartZoom (event) {
-    // log('_onFlameChartZoom', event)
-
-    // log('this.flamechart.x.domain', this.flamechart.x.domain())
-    // log('this.flamechart.x.range', this.flamechart.x.range())
     const t = event.transform
-    const sMin = -(t.x / t.k)
-    const [, [zoomX1]] = this.flamechart.zoom.translateExtent()
-    const sMax = (zoomX1 / t.k)
-    // log('sMin, sMax', sMin, sMax)
     const s = d3.extent(this.flamechart.x.range().map(t.invertX, t))
-    // log(t)
-    // log(t.rescaleX(this.overview.x).domain())
-    // log(this.flamechart.x.range().map(t.invertX, t))
+
     this._updateFlamechartScale(s)
 
     this.flamechart.render()

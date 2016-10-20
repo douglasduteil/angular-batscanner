@@ -92,13 +92,13 @@ Component({
   }],
 
   ngOnChanges (changes) {
-    if (changes.width && this.x) {
-      this.x.range([0, this.width])
+    if (changes.data && this.area && this.data) {
+      const overviewComponentUpdate = () => this.update(this.data)
+      window.requestIdleCallback(overviewComponentUpdate)
     }
 
-    if (changes.data && this.area && this.data) {
-      this.update()
-    }
+    const overviewComponentViewModelUpdate = () => this.viewModelUpdate()
+    window.requestIdleCallback(overviewComponentViewModelUpdate)
   },
 
   ngAfterViewInit () {
@@ -107,10 +107,11 @@ Component({
 
   ngAfterViewChecked () {
     const overviewComponentRenderFrame = () => { this.render() }
-    window.requestIdleCallback(() => {
+    const overviewComponentAskForRenderFrame = () => {
       // Scheduling the next render function after the last idle "frame"
       window.requestAnimationFrame(overviewComponentRenderFrame)
-    })
+    }
+    window.requestIdleCallback(overviewComponentAskForRenderFrame)
   },
 
   //
@@ -171,47 +172,49 @@ Component({
     d3.select(this.brushElement.nativeElement).call(this.brush)
   },
 
-  update () {
-    const lastEvent = this.data[this.data.length - 1] || {}
-    this.startTime = this.startTime || (this.data[0] || {}).timestamp
+  viewModelUpdate () {
+    this.brush.extent([[0, 0], [this.width, this.height]])
+
+    //
+
+    const axisRange = polylinearRangeFromDomains({
+      domains: this.seriesDomains,
+      range: [0, this.width]
+    })
+
+    this.x.domain(this.axisDomain)
+      .range(axisRange)
+
+    //
+
+    const tickValues = axisTicks({
+      domains: this.seriesDomains,
+      x: this.x
+    })
+
+    this.xAxis.tickValues(tickValues)
+  },
+
+  update (data) {
+    const lastEvent = data[data.length - 1] || {}
+    this.startTime = this.startTime || (data[0] || {}).timestamp
     this.endTime = lastEvent.timestamp + lastEvent.duration
 
-    const processAndAssignNewSerie = () => {
-      const proporstionData = calculateEventProportion(
-        this.data, this.startTime, proporstionData
-      )
+    const proporstionData = calculateEventProportion(
+      data, this.startTime, proporstionData
+    )
 
-      const ascSort = (a, b) => a - b
-      const dataExtent = [(this.data[0] || {}).timestamp, this.endTime].sort(ascSort)
-      this.seriesDomains.push(dataExtent)
+    const ascSort = (a, b) => a - b
+    const dataExtent = [(data[0] || {}).timestamp, this.endTime].sort(ascSort)
+    this.seriesDomains.push(dataExtent)
 
-      const axisRange = polylinearRangeFromDomains({
-        domains: this.seriesDomains,
-        range: [0, this.width]
-      })
+    this.axisDomain = this.axisDomain.concat(
+      d3.extent(dataExtent)
+    )
 
-      this.axisDomain = this.axisDomain.concat(
-        d3.extent(dataExtent)
-      )
+    //
 
-      this.x.domain(this.axisDomain)
-        .range(axisRange)
-
-      //
-
-      const tickValues = axisTicks({
-        domains: this.seriesDomains,
-        x: this.x
-      })
-
-      this.xAxis.tickValues(tickValues)
-
-      //
-
-      this.series = this.series.concat(this.stack(proporstionData))
-    }
-
-    window.requestIdleCallback(processAndAssignNewSerie)
+    this.series = this.series.concat(this.stack(proporstionData))
   },
 
   //
