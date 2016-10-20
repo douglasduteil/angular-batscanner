@@ -83,14 +83,18 @@ Component({
   }],
 
   ngOnInit () {
+    const rootSvgGraphComponentReattachChangeDetector =
+      () => { this._ref.reattach() }
+
     Observable.fromEvent(window, 'resize')
       .do(() => this._ref.detach())
       .debounceTime(100)
       .startWith(null)
       .subscribe(() => {
-        log('resize')
         this._resize()
-        this._ref.reattach()
+        window.requestAnimationFrame(
+          rootSvgGraphComponentReattachChangeDetector
+        )
       })
   },
 
