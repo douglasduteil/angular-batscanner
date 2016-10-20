@@ -97,8 +97,8 @@ Component({
       window.requestIdleCallback(overviewComponentUpdate)
     }
 
-    const overviewComponentViewModelUpdate = () => this.viewModelUpdate()
-    window.requestIdleCallback(overviewComponentViewModelUpdate)
+    const overviewComponentUpdateViewModel = () => this.updateViewModel()
+    window.requestIdleCallback(overviewComponentUpdateViewModel)
   },
 
   ngAfterViewInit () {
@@ -172,29 +172,6 @@ Component({
     d3.select(this.brushElement.nativeElement).call(this.brush)
   },
 
-  viewModelUpdate () {
-    this.brush.extent([[0, 0], [this.width, this.height]])
-
-    //
-
-    const axisRange = polylinearRangeFromDomains({
-      domains: this.seriesDomains,
-      range: [0, this.width]
-    })
-
-    this.x.domain(this.axisDomain)
-      .range(axisRange)
-
-    //
-
-    const tickValues = axisTicks({
-      domains: this.seriesDomains,
-      x: this.x
-    })
-
-    this.xAxis.tickValues(tickValues)
-  },
-
   update (data) {
     const lastEvent = data[data.length - 1] || {}
     this.startTime = this.startTime || (data[0] || {}).timestamp
@@ -215,6 +192,29 @@ Component({
     //
 
     this.series = this.series.concat(this.stack(proporstionData))
+  },
+
+  updateViewModel () {
+    this.brush.extent([[0, 0], [this.width, this.height]])
+
+    //
+
+    const axisRange = polylinearRangeFromDomains({
+      domains: this.seriesDomains,
+      range: [0, this.width]
+    })
+
+    this.x.domain(this.axisDomain)
+      .range(axisRange)
+
+    //
+
+    const tickValues = axisTicks({
+      domains: this.seriesDomains,
+      x: this.x
+    })
+
+    this.xAxis.tickValues(tickValues)
   },
 
   //
