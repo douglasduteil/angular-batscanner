@@ -50,7 +50,9 @@
 
     const {
       BATSCANNER_PROVIDERS,
-      BATSCANNER_ROOT_COMPONENT
+      BATSCANNER_ROOT_COMPONENT,
+      BatscannerEventEmitter,
+      BatscannerWindowPostMessageEmitter
     } = angularBatscannerCore
 
     const {HeroListAppModule, AppComponent} = heroListApp
@@ -60,7 +62,15 @@
     const compilerOptions = {
       providers: [
         BATSCANNER_PROVIDERS,
-        {provide: BATSCANNER_ROOT_COMPONENT, useValue: AppComponent}
+        {
+          provide: BATSCANNER_ROOT_COMPONENT,
+          useValue: AppComponent
+        },
+        {
+          provide: BatscannerEventEmitter,
+          useClass: BatscannerWindowPostMessageEmitter,
+          multi: true
+        }
       ]
     }
 

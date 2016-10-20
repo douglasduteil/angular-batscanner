@@ -40,12 +40,21 @@
   (function () {
     const { ng, angularBatscannerCore } = window
     const {
+      Component,
+      NgModule
+    } = ng.core
+    const {
+      CommonModule
+    } = ng.common
+    const {
       BATSCANNER_PROVIDERS,
-      BATSCANNER_ROOT_COMPONENT
+      BATSCANNER_ROOT_COMPONENT,
+      BatscannerEventEmitter,
+      BatscannerWindowPostMessageEmitter
     } = angularBatscannerCore
 
-    const TimerComponent = ng.core
-      .Component({
+    const TimerComponent =
+      Component({
         inputs: ['time: value'],
         selector: 'timer',
         template: '<h1>Time : {{ time }}sec</h1>'
@@ -54,11 +63,11 @@
         constructor: function TimerComponent () {}
       })
 
-    const DemoTimerComponent = ng.core
-      .Component({
+    const DemoTimerComponent =
+      Component({
         selector: 'demo-timer',
         template: `
-          <timer [value]="timerValue"></timer>
+          <pre>{{ timerValue | json}}</pre>
         `
       })
       .Class({
@@ -79,8 +88,8 @@
       { path: '', component: DemoTimerComponent }
     ])
 
-    const TimerAppComponent = ng.core
-      .Component({
+    const TimerAppComponent =
+      Component({
         selector: 'timer-app',
         template: '<demo-timer></demo-timer>'//'<router-outlet></router-outlet>'
       })
@@ -88,10 +97,11 @@
         constructor: function TimerAppComponent () {}
       })
 
-    const AppModule = ng.core
-      .NgModule({
+    const AppModule =
+      NgModule({
         imports: [
           ng.platformBrowser.BrowserModule,
+          CommonModule
          // rooting
         ],
         declarations: [
@@ -108,7 +118,15 @@
     const compilerOptions = {
       providers: [
         BATSCANNER_PROVIDERS,
-        {provide: BATSCANNER_ROOT_COMPONENT, useValue: TimerAppComponent}
+        {
+          provide: BATSCANNER_ROOT_COMPONENT,
+          useValue: TimerAppComponent
+        },
+        {
+          provide: BatscannerEventEmitter,
+          useClass: BatscannerWindowPostMessageEmitter,
+          multi: true
+        }
       ]
     }
 

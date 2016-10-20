@@ -30,13 +30,14 @@ function connectToExistingPanelIfAngularBatscannerLoaded () {
     return
   }
 
+  clearInterval(loadCheckInterval)
+
   asyncIsBatscannerLoaded(function (pageHasNgBatScan, err) {
     if (!pageHasNgBatScan || !panelInstance) {
       return
     }
 
     connectToExistingPanel(panelInstance)
-    clearInterval(loadCheckInterval)
   })
 }
 

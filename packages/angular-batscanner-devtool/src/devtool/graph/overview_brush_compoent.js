@@ -16,6 +16,7 @@ import {polylinearRangeFromDomains} from './sdf.js'
 //
 
 const LIKECYCLE_HOOKS = [
+  'ngPipeTransform',
   'OnChanges',
   'OnInit',
   'DoCheck',
@@ -228,7 +229,9 @@ function calculateEventProportion (data, relativeTime, proportionsDataOutput) {
     const lastDepth = memo.depthMap[lastEvent.id] || -1
     const currentDepth = memo.depthMap[event.id] || 1
 
-    if (currentDepth <= lastDepth) {
+    const isFlatEvent = lastEvent.type === 'ngPipeTransform'
+
+    if (currentDepth <= lastDepth || isFlatEvent) {
       eventStack.pop()
     }
 

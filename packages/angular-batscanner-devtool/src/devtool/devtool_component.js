@@ -104,6 +104,8 @@ Component({
       this.graphState = []
     }
 
-    this.closingNotifier$.next()
+    const batscannerDevtoolComponentToggleRecord =
+      () => this.closingNotifier$.next()
+    window.requestIdleCallback(batscannerDevtoolComponentToggleRecord)
   }
 })

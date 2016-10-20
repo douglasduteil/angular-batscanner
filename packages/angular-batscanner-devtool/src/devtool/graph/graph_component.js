@@ -115,54 +115,81 @@ Component({
   //
 
   _onOverviewBushed (event) {
+    // log('_onOverviewBushed', event)
     const s = event.selection || this.overview.x.range()
-    const zoom = this.flamechart.width / (s[1] - s[0])
-    const x = s[0] * zoom
+    // log(s)
 
-    const rescaleX = this.overview.x.copy().domain(
-      this.overview.x.range()
-        .map((rx) => (rx + x) / zoom)
-        .map(this.overview.x.invert, this.overview.x)
-    )
-
-    this.flamechart.x.domain(rescaleX.domain())
-
-    d3.select(this.flamechart.axisElement.nativeElement)
-      .call(this.flamechart.xAxis)
+    this._updateFlamechartScale(s)
 
     const zoomTransform = d3.zoomIdentity
-      .scale(zoom)
+      .scale(this.svgWidth / (s[1] - s[0]))
       .translate(-s[0], 0)
 
     d3.select(this.flamechart.zoomElement.nativeElement)
       .call(this.flamechart.zoom.transform, zoomTransform)
 
-    d3.select(this.flamechart.flameGroupElement.nativeElement)
-      .call(this.flamechart.flames.bind(this.flamechart))
+    this.flamechart.render()
   },
 
   _onFlameChartZoom (event) {
-    console.log('_onFlameChartZoom', event)
-    const t = event.transform
-    console.log(t)
-    console.log(t.rescaleX(this.overview.x).domain())
-    console.log(this.flamechart.x.range().map(t.invertX, t))
-    this.flamechart.x.domain(t.rescaleX(this.overview.x).domain())
-    // HACK(@douglasduteil): force range back to normal
-    // Might be better to not change the range on brush...
-    this.flamechart.x.range(this.overview.x.range())
+    // log('_onFlameChartZoom', event)
 
-    d3.select(this.flamechart.axisElement.nativeElement)
-      .call(this.flamechart.xAxis)
+    // log('this.flamechart.x.domain', this.flamechart.x.domain())
+    // log('this.flamechart.x.range', this.flamechart.x.range())
+    const t = event.transform
+    const sMin = -(t.x / t.k)
+    const [, [zoomX1]] = this.flamechart.zoom.translateExtent()
+    const sMax = (zoomX1 / t.k)
+    // log('sMin, sMax', sMin, sMax)
+    const s = d3.extent(this.flamechart.x.range().map(t.invertX, t))
+    // log(t)
+    // log(t.rescaleX(this.overview.x).domain())
+    // log(this.flamechart.x.range().map(t.invertX, t))
+    this._updateFlamechartScale(s)
+
+
+    this.flamechart.render()
 
     d3.select(this.overview.brushElement.nativeElement)
       .call(
         this.overview.brush.move,
         d3.extent(this.flamechart.x.range().map(t.invertX, t))
       )
+  },
 
-    d3.select(this.flamechart.flameGroupElement.nativeElement)
-      .call(this.flamechart.flames.bind(this.flamechart))
+  _updateFlamechartScale (section) {
+    const ascSort = (a, b) => a - b
+    const [sdMin, sdMax] = section.map(this.overview.x.invert).sort(ascSort)
+
+    if (sdMin === sdMax) {
+      return
+    }
+
+    const sDomain = this.overview.seriesDomains
+      .filter(([dMin, dMax]) => dMax >= sdMin && dMin <= sdMax)
+      // HACK(@douglasduteil): make lil' deep copy here
+      // The arrays inside this array will mutate to adjust the min and max
+      // scale. So a copy on those arrays is required.
+      .map((domain) => domain.slice(0))
+
+    if (!sDomain.length) {
+      return
+    }
+
+    // HACK(@douglasduteil): dangerous mutation
+    // Took me 2 hours to find out how bad those two line of mutation are...
+    // Might consider to trash them to avoid future problems...
+    sDomain[0][0] = sdMin
+    sDomain[sDomain.length - 1][1] = sdMax
+
+    const axisRange = polylinearRangeFromDomains({
+      domains: sDomain,
+      range: [0, this.flamechart.width]
+    })
+
+    this.flamechart.x
+      .domain(sDomain.reduce((memo, sub) => memo.concat(sub), []))
+      .range(axisRange)
   },
 
   _updateRootSVGSize () {

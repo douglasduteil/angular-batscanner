@@ -5,7 +5,7 @@ const dis = 20
 export function polylinearRangeFromDomains (options) {
   const [min, max] = options.range
   const offset = 0 // (options.offset || dis) / 2
-  const seriesDistances = options.domains.map(([dMin, dMax]) => dMin - dMax)
+  const seriesDistances = options.domains.map(([dMin, dMax]) => dMax - dMin)
 
   const totalSerieDistance = seriesDistances
     .reduce((memo, domainLenght) => memo + domainLenght, 0)

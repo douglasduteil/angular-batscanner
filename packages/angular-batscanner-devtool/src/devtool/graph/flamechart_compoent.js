@@ -132,6 +132,8 @@ Component({
     this.endTime = null
     this.data = []
     this.series = []
+    this.seriesDomains = []
+    this.axisDomain = []
   },
 
   //
@@ -159,7 +161,7 @@ Component({
 
   flames (context) {
     const selection = context.selection ? context.selection() : context
-    const sizeX = (posX) => this.x(this.x.invert(0) + posX)
+    const sizeX = (d) => this.x(d.timestamp + (d.duration || 1)) - this.x(d.timestamp)
 
     const flame = selection.selectAll('.flame')
       .data(this.series)
@@ -182,7 +184,7 @@ Component({
 
     rectEnter.merge(rect)
       .attr('height', (d) => itemHeight)
-      .attr('width', (d) => sizeX((d.duration || 1)))
+      .attr('width', (d) => sizeX(d))
       .attr('fill', (d, i) => this.color(d.type))
 
     //
@@ -193,7 +195,7 @@ Component({
 
     foreignObjectEnter.merge(foreignObject)
       .attr('height', (d) => itemHeight)
-      .attr('width', (d) => sizeX((d.duration || 1)))
+      .attr('width', (d) => sizeX(d))
 
     //
 
@@ -204,9 +206,9 @@ Component({
 
     lableEnter.merge(label)
       .style('display', (d) => (
-        sizeX((d.duration || 1)) < minimalMilliscondToDisplayText)
+        sizeX(d) < minimalMilliscondToDisplayText
         ? 'none' : 'block'
-      )
+      ))
       .attr('fill', '#000')
       .text((d) => `${d.type} @ ${d.targetName}`)
   },
@@ -227,6 +229,7 @@ Component({
   },
 
   update () {
+    //
     const lastEvent = this.data[this.data.length - 1] || {}
     this.startTime = this.startTime || (this.data[0] || {}).timestamp
     this.endTime = lastEvent.timestamp + lastEvent.duration
@@ -246,6 +249,8 @@ Component({
     this.x.domain(this.axisDomain)
       .range(axisRange)
 
+    //
+
     const IdDepthMap = this.data.reduce((memo, e) => {
       if (Number.isNaN(Number(memo[e.id]))) {
         memo[e.id] = memo.length
@@ -261,13 +266,13 @@ Component({
       })
     })
 
+    //
+
     this.series = this.series.concat(newSerie)
   },
   //
 
   _zoomed () {
-    console.log(d3.event, d3.event.type)
-    console.log(d3.event.sourceEvent, d3.event.sourceEvent.type)
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'brush') {
       return // ignore zoom-by-brush
     }

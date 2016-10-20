@@ -141,7 +141,7 @@
 
         this.debuggerState$ = (new Subject())
           .do(() => {
-            startTime += 1000
+            startTime += 5000
             state = {idStack: [], maxDepth: 0}
           })
           .map((events) => events.reduce((memo, event, index) => {
@@ -152,9 +152,19 @@
 
             const latestSameIdEventIndex = state[event.id].lastEventIndex
             state[event.id].lastEventIndex = index
-            if (!Number.isNaN(Number(latestSameIdEventIndex))) {
-              const lastEvent = memo[latestSameIdEventIndex]
+
+            const hasPreviousEvent = !Number.isNaN(Number(latestSameIdEventIndex))
+
+            const lastEvent = memo[latestSameIdEventIndex] || {}
+            const isFlatEvent = lastEvent.type === 'ngPipeTransform'
+
+            const shouldExtendDuration = hasPreviousEvent && !isFlatEvent
+
+            if (shouldExtendDuration) {
               lastEvent.duration = startTime - lastEvent.timestamp
+              state[event.id].timestamp = startTime
+            }
+            if (isFlatEvent) {
               state[event.id].timestamp = startTime
             }
 
@@ -174,8 +184,8 @@
 
         this.events = window.batscannerEventDb
 
-        setTimeout(() => this.trigger(this.events[0].data), 2000)
-        setTimeout(() => this.trigger(this.events[0].data), 4000)
+        setTimeout(() => this.trigger(this.events[3].data), 500)
+        //setTimeout(() => this.trigger(this.events[0].data), 700)
       },
 
       ngOnDestroy () {
@@ -298,6 +308,19 @@
           {id: 2, targetName: 'MyRouteComponent', type: 'AfterViewChecked'},
           {id: 1, targetName: 'RouterOutlet', type: 'AfterContentChecked'},
           {id: 1, targetName: 'RouterOutlet', type: 'AfterViewChecked'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterViewChecked'}
+        ]
+      },
+      {
+        name: 'Pipe Run',
+        data: [
+          {id: 3, targetName: 'DumbPipe', type: 'ngPipeTransform'},
+          {id: 0, targetName: 'RootComponent', type: 'DoCheck'},
+          {id: 0, targetName: 'RootComponent', type: 'AfterContentChecked'},
+          {id: 1, targetName: 'ViewComponent', type: 'DoCheck'},
+          {id: 1, targetName: 'ViewComponent', type: 'AfterContentChecked'},
+          {id: 3, targetName: 'DumbPipe', type: 'ngPipeTransform'},
+          {id: 1, targetName: 'ViewComponent', type: 'AfterViewChecked'},
           {id: 0, targetName: 'RootComponent', type: 'AfterViewChecked'}
         ]
       }
