@@ -14,7 +14,7 @@ import {LifecycleHooksColors} from './lifecycle_hooks_colors.js'
 import {
   axisTicks,
   polylinearRangeFromDomains
-} from './sdf.js'
+} from './graph_util.js'
 
 //
 

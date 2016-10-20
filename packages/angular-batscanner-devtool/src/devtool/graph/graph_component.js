@@ -14,7 +14,7 @@ import {Observable} from 'rxjs/Observable'
 
 import * as d3 from 'd3'
 
-import {axisTicks, polylinearRangeFromDomains} from './sdf.js'
+import {axisTicks, polylinearRangeFromDomains} from './graph_util.js'
 
 //
 
