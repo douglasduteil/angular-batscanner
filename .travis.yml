@@ -6,6 +6,7 @@ language: node_js
 cache:
   directories:
   - $HOME/.npm
+  - .eslintcache
   - node_modules
 env:
   global:
