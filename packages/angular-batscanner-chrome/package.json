@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "build": "node scripts/build.js",
+    "prerelease": "./scripts/prerelease.sh",
     "start": "npm run watch:build",
     "test": "echo \"(ノಠ ∩ಠ)ノ彡( o°o)\" && exit 0",
     "watch:build": "chokidar 'scripts/**/*.js' 'src/**/*' 'node_modules/angular-batscanner-devtool/lib' -c 'npm run build' --initial"
