@@ -19,6 +19,9 @@
 
 > The chrome extension
 
+[![link to chrome store](https://developer.chrome.com/webstore/images/ChromeWebStore_BadgeWBorder_v2_340x96.png)](https://chrome.google.com/webstore/detail/angular-batscanner/gcngciildkejiapchdgpcniflijoiadf)
+
+
 ### angular-batscanner-core
 
 > The core functionalities
