@@ -26,13 +26,13 @@
 
 > The core functionalities
 
-<a href="https://npmjs.org/package/angular-batscanner-core"><img alt="NPM version" src="https://img.shields.io/npm/v/angular-batscanner-core.svg?style=flat-square"></a>
+[![NPM version](https://img.shields.io/npm/v/angular-batscanner-core.svg?style=flat-square)](https://npmjs.org/package/angular-batscanner-core)
 
 ### angular-batscanner-devtool
 
 > The timeline devtool 
 
-<a href="https://npmjs.org/package/angular-batscanner-devtool"><img alt="NPM version" src="https://img.shields.io/npm/v/angular-batscanner-devtool.svg?style=flat-square"></a>
+[![NPM version](https://img.shields.io/npm/v/angular-batscanner-devtool.svg?style=flat-square)](https://npmjs.org/package/angular-batscanner-devtool)
 
 ## TODO
 
