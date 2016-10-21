@@ -9,10 +9,27 @@
 
 <p align="center">
   <a href="https://travis-ci.org/douglasduteil/angular-batscanner"><img alt="Travis Status" src="https://img.shields.io/travis/douglasduteil/angular-batscanner/master.svg?style=flat-square&label=travis"></a>
-  <a href="https://npmjs.org/package/angular-batscanner"><img alt="NPM version" src="https://img.shields.io/npm/v/angular-batscanner.svg?style=flat-square"></a>
   <a href="http://standardjs.com"><img alt="JavaScript Style Guide" src="https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square"></a>
   <a href="http://unmaintained.tech"><img alt="No Maintenanc Intended" src="https://img.shields.io/badge/No_Maintenanc_Intended-%C3%97-red.svg?style=flat-square"></a>
 </p>
+
+## Packages 
+
+### angular-batscanner-chrome
+
+> The chrome extension
+
+### angular-batscanner-core
+
+> The core functionalities
+
+<a href="https://npmjs.org/package/angular-batscanner-core"><img alt="NPM version" src="https://img.shields.io/npm/v/angular-batscanner-core.svg?style=flat-square"></a>
+
+### angular-batscanner-devtool
+
+> The timeline devtool 
+
+<a href="https://npmjs.org/package/angular-batscanner-devtool"><img alt="NPM version" src="https://img.shields.io/npm/v/angular-batscanner-devtool.svg?style=flat-square"></a>
 
 ## TODO
 
