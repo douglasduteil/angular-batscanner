@@ -4,6 +4,7 @@ const del = require('del')
 const camelCase = require('camel-case')
 const rollup = require('rollup')
 const babel = require('rollup-plugin-babel')
+const babelrc = require('babelrc-rollup')
 const pkg = require('../package.json')
 
 const destDirectory = 'lib'
@@ -39,9 +40,10 @@ function compile (options) {
       entry: options.target,
       external: Object.keys(pkg.dependencies),
       plugins: [
-        babel({
-          exclude: 'node_modules/**'
-        })
+        babel(Object.assign(
+          {exclude: 'node_modules/**'},
+          babelrc.default({path: '.babelrc.rollup.config.json'})
+        ))
       ]
     })
     .then(bundle => bundle.write({
