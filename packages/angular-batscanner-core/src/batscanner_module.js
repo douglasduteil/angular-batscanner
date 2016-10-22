@@ -1,7 +1,7 @@
 //
 
 import {
-  __compiler_private__ as ngCompilerPrivateParts // eslint-disable-line camelcase
+  CompileMetadataResolver
 } from '@angular/compiler'
 
 import {BatScannerCompileMetadataResolver} from './metadata_resolver.js'
@@ -9,10 +9,6 @@ import {
   BatscannerEventEmitter,
   BatscannerEventAggregator
 } from './emitter/index.js'
-
-//
-
-const { CompileMetadataResolver } = ngCompilerPrivateParts
 
 //
 

@@ -1,7 +1,7 @@
 //
 
 import {
-  __compiler_private__ as ngCompilerPrivateParts
+  CompileMetadataResolver
 } from '@angular/compiler'
 
 import {
@@ -17,7 +17,6 @@ import {BATSCANNER_ID} from './constant.js'
 //
 
 const { LifecycleHooks, LIFECYCLE_HOOKS_VALUES } = ngCorePrivateParts
-const { CompileMetadataResolver } = ngCompilerPrivateParts
 
 //
 
