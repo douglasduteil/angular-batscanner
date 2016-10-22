@@ -1,0 +1,18 @@
+{
+  "comments": false,
+  "env": {
+    "test": {
+      "auxiliaryCommentBefore": "istanbul ignore next"
+    }
+  },
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "node": "6"
+        }
+      }
+    ]
+  ]
+}
