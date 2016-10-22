@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "start": "npm run watch:build",
-    "test": "echo \"(╯°Д°）╯︵/(.□ . )\" && exit 0",
+    "test": "echo \"(╯°Д°）╯︵/(.□ . )\" && exit 1",
     "watch:build": "chokidar 'scripts/**/*.js' 'src/**/*.js' -c 'npm run build' --initial"
   },
   "keywords": [],
@@ -23,9 +23,10 @@
     "rollup-plugin-babel": "^2.6.1"
   },
   "dependencies": {
-    "@angular/compiler": "^2.0.0",
-    "@angular/core": "^2.0.0",
-    "rxjs": "^5.0.0-beta.12",
-    "zone.js": "^0.6.23"
+    "@angular/compiler": "^2.1.1",
+    "@angular/core": "^2.1.1",
+    "reflect-metadata": "^0.1.8",
+    "rxjs": "5.0.0-beta.12",
+    "zone.js": "^0.6.21"
   }
 }
