@@ -1,4 +1,5 @@
 node_modules
 
-/packages/_demos/playgrounds/*/lib
 /packages/*/lib
+/packages/_demos/playgrounds/*/lib
+/packages/angular-batscanner-chrome/dist
