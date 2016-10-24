@@ -50,7 +50,9 @@
       BATSCANNER_PROVIDERS,
       BATSCANNER_ROOT_COMPONENT,
       BatscannerEventEmitter,
-      BatscannerWindowPostMessageEmitter
+      BatscannerWindowPostMessageEmitter,
+      BatscannerPerformanceMarkEmitter,
+      BatscannerRainbowConsoleEmitter
     } = angularBatscannerCore
 
     const TimerComponent =
@@ -125,6 +127,16 @@
         {
           provide: BatscannerEventEmitter,
           useClass: BatscannerWindowPostMessageEmitter,
+          multi: true
+        },
+        {
+          provide: BatscannerEventEmitter,
+          useClass: BatscannerRainbowConsoleEmitter,
+          multi: true
+        },
+        {
+          provide: BatscannerEventEmitter,
+          useClass: BatscannerPerformanceMarkEmitter,
           multi: true
         }
       ]
