@@ -49,18 +49,18 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
     this.isPipe = (type) => Boolean(_pipeResolver.resolve(type, false))
   }
 
-  getTypeMetadata (directiveType, moduleUrl, dependencies) {
+  getTypeMetadata (type, moduleUrl, dependencies) {
     const superGetTypeMetadata =
-      (directiveType) => super.getTypeMetadata(
-        directiveType, moduleUrl, dependencies
+      (type) => super.getTypeMetadata(
+        type, moduleUrl, dependencies
       )
 
-    directiveType = resolveForwardRef(directiveType)
+    type = resolveForwardRef(type)
 
     return false ||
-      this._scanTransformPipeHook(directiveType, superGetTypeMetadata) ||
-      this._scanDirectiveHook(directiveType, superGetTypeMetadata) ||
-      superGetTypeMetadata(directiveType)
+      this._scanTransformPipeHook(type, superGetTypeMetadata) ||
+      this._scanDirectiveHook(type, superGetTypeMetadata) ||
+      superGetTypeMetadata(type)
   }
 
   //
