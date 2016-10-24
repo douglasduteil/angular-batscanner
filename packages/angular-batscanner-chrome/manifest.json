@@ -3,7 +3,7 @@
   "name": "Angular BatScanner",
   "description": "Angular 2 BatScanner extension",
   "version": "1.0.0.1",
-  "minimum_chrome_version": "43",
+  "minimum_chrome_version": "52",
   "icons": {
     "16": "icons/icon-16x16.png",
     "48": "icons/icon-48x48.png",
