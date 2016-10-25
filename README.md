@@ -34,6 +34,159 @@
 
 [![NPM version](https://img.shields.io/npm/v/angular-batscanner-devtool.svg?style=flat-square)](https://npmjs.org/package/angular-batscanner-devtool)
 
+## Install
+
+```sh
+npm install angular-batscanner-core
+```
+
+You will need to replace the default `CompilerMetadataResolver` with 
+`BatscannerCompilerMetadataResolver` to be able to extract the activity of the
+all components at runtime.
+
+## Usage
+
+### Rainbow comsole
+
+![](.github/images/rainbowConsoleEmitter.png)
+
+```js
+import {
+  BATSCANNER_PROVIDERS,
+  BATSCANNER_ROOT_COMPONENT,
+  BatscannerEventEmitter,
+  BatscannerRainbowConsoleEmitter
+} from 'angular-batscanner-core'
+
+const compilerOptions = {
+  providers: [
+    BATSCANNER_PROVIDERS,
+    {
+      provide: BATSCANNER_ROOT_COMPONENT,
+      useValue: TimerAppComponent
+    },
+    {
+      provide: BatscannerEventEmitter,
+      useClass: BatscannerRainbowConsoleEmitter,
+      multi: true
+    }
+  ]
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  ng.platformBrowserDynamic
+    .platformBrowserDynamic()
+    .bootstrapModule(AppModule, compilerOptions)
+})
+```
+
+### Devtools performance marks
+
+![](.github/images/performanceMarks.png)
+
+```js
+import {
+  BATSCANNER_PROVIDERS,
+  BATSCANNER_ROOT_COMPONENT,
+  BatscannerEventEmitter,
+
+  BatscannerPerformanceMarkEmitter
+} from 'angular-batscanner-core'
+
+const compilerOptions = {
+  providers: [
+    BATSCANNER_PROVIDERS,
+    {
+      provide: BATSCANNER_ROOT_COMPONENT,
+      useValue: TimerAppComponent
+    },
+    {
+      provide: BatscannerEventEmitter,
+      useClass: BatscannerPerformanceMarkEmitter,
+      multi: true
+    }
+  ]
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  ng.platformBrowserDynamic
+    .platformBrowserDynamic()
+    .bootstrapModule(AppModule, compilerOptions)
+})
+```
+
+### Batscanner devtool
+
+![](.github/images/batscanner-devtool.png)
+
+Install the [batscanner chrome devtool](https://chrome.google.com/webstore/detail/angular-batscanner/gcngciildkejiapchdgpcniflijoiadf)
+
+```js
+import {
+  BATSCANNER_PROVIDERS,
+  BATSCANNER_ROOT_COMPONENT,
+  BatscannerEventEmitter,
+
+  BatscannerWindowPostMessageEmitter
+} from 'angular-batscanner-core'
+
+const compilerOptions = {
+  providers: [
+    BATSCANNER_PROVIDERS,
+    {
+      provide: BATSCANNER_ROOT_COMPONENT,
+      useValue: TimerAppComponent
+    },
+    {
+      provide: BatscannerEventEmitter,
+      useClass: BatscannerWindowPostMessageEmitter,
+      multi: true
+    }
+  ]
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  ng.platformBrowserDynamic
+    .platformBrowserDynamic()
+    .bootstrapModule(AppModule, compilerOptions)
+})
+```
+
+Then open the devtool you should see a new tab named `Angular Batscanner` after 
+you app started. Click on it ;)
+The devtool is recording by default when it's open. You can go on using your app
+and see on the devtool the Angular activity.
+
+
+### All for them (because YOLO)
+
+```js
+const compilerOptions = {
+  providers: [
+    BATSCANNER_PROVIDERS,
+    {
+      provide: BATSCANNER_ROOT_COMPONENT,
+      useValue: TimerAppComponent
+    },
+    {
+      provide: BatscannerEventEmitter,
+      useClass: BatscannerWindowPostMessageEmitter,
+      multi: true
+    },
+    {
+      provide: BatscannerEventEmitter,
+      useClass: BatscannerRainbowConsoleEmitter,
+      multi: true
+    },
+    {
+      provide: BatscannerEventEmitter,
+      useClass: BatscannerPerformanceMarkEmitter,
+      multi: true
+    }
+  ]
+}
+```
+
 ## TODO
 
 - Use standard version and conventional-github-releaser
