@@ -21,7 +21,7 @@
   "author": "Douglas Duteil <douglasduteil@gmail.com> (douglasduteil.github.io)",
   "license": "WTFPL",
   "devDependencies": {
-    "babel-core": "^6.17.0",
+    "babel-core": "^6.20.0",
     "babel-preset-env": "0.0.7",
     "chai": "^3.5.0",
     "chokidar-cli": "^1.2.0",
