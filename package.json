@@ -22,7 +22,7 @@
   "license": "WTFPL",
   "devDependencies": {
     "babel-core": "^6.17.0",
-    "babel-preset-env": "0.0.7",
+    "babel-preset-env": "1.0.0",
     "chai": "^3.5.0",
     "chokidar-cli": "^1.2.0",
     "douglasduteil...lerna": "2.0.0-beta.30.1",
