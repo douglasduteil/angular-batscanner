@@ -220,6 +220,6 @@ export class BatScannerCompileMetadataResolver extends CompileMetadataResolver {
 }
 
 BatScannerCompileMetadataResolver.ctorParameters =
-  // Copy CompileMetadataResolver.ctorParameters
-  CompileMetadataResolver.ctorParameters.map((token) => ({type: token.type}))
+  // Get copy of the CompileMetadataResolver.ctorParameters
+  CompileMetadataResolver.ctorParameters()
 BatScannerCompileMetadataResolver.ctorParameters.unshift({ type: Injector })
