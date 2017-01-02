@@ -9,6 +9,11 @@ const pkg = require('../package.json')
 
 const destDirectory = 'lib'
 const targetFormats = ['umd']
+const external = Object.keys(pkg.dependencies)
+  .concat([
+    'rxjs/Observable',
+    'rxjs/Subject'
+  ])
 
 Promise.resolve()
   .then(() => del([`${destDirectory}/*`]))
@@ -38,7 +43,7 @@ function compile (options) {
   return Promise.resolve()
     .then(() => rollup.rollup({
       entry: options.target,
-      external: Object.keys(pkg.dependencies),
+      external,
       plugins: [
         babel(Object.assign(
           {exclude: 'node_modules/**'},
